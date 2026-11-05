@@ -1,16 +1,16 @@
 package com.ecoembes.dto;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class DumpsterUsageDTO {
-	LocalDate date;
+	LocalDateTime date;
 	int numContainers;
 	String fillLevel;
 	
 	//CONSTRUCTOR
 	
-	public DumpsterUsageDTO(LocalDate date, int numContainers, String fillLevel) {
+	public DumpsterUsageDTO(LocalDateTime date, int numContainers, String fillLevel) {
 		this.date = date;
 		this.numContainers = numContainers;
 		this.fillLevel = fillLevel;
@@ -18,10 +18,10 @@ public class DumpsterUsageDTO {
 	
 	//GETTERS AND SETTERS
 	
-	public LocalDate getDate() {
+	public LocalDateTime getDate() {
 		return date;
 	}
-	public void setDate(LocalDate date) {
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
 	public int getNumContainers() {
