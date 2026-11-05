@@ -3,12 +3,26 @@ package com.ecoembes.dto;
 import java.util.Objects;
 
 public class DumpsterDTO {
-	int id;
-	String location;
-	int postalCode;
-	int capacity;
-	int numContainers;
-	String fillLevel;
+	private int id;
+	private String location;
+	private int postalCode;
+	private int capacity;
+	private int numContainers;
+	private String fillLevel;
+	
+	//CONSTRUCTOR
+	
+	public DumpsterDTO(int id, String location, int postalCode, int capacity, int numContainers, String fillLevel) {
+		this.id = id;
+		this.location = location;
+		this.postalCode = postalCode;
+		this.capacity = capacity;
+		this.numContainers = numContainers;
+		this.fillLevel = fillLevel;
+		}
+	
+	//GETTERS AND SETTERS
+	
 	public int getId() {
 		return id;
 	}

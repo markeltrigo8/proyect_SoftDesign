@@ -7,6 +7,17 @@ public class DumpsterUsageDTO {
 	LocalDate date;
 	int numContainers;
 	String fillLevel;
+	
+	//CONSTRUCTOR
+	
+	public DumpsterUsageDTO(LocalDate date, int numContainers, String fillLevel) {
+		this.date = date;
+		this.numContainers = numContainers;
+		this.fillLevel = fillLevel;
+	}
+	
+	//GETTERS AND SETTERS
+	
 	public LocalDate getDate() {
 		return date;
 	}
