@@ -1,5 +1,7 @@
 package com.ecoembes.domain;
 
+import org.springframework.util.DigestUtils;
+
 public class Employee {
 	private String name;
 	private String email;
@@ -36,5 +38,7 @@ public class Employee {
 		this.password = password;
 	}
 	
-	
+	public boolean checkPassword(String password) {
+		return this.password.equals(password);
+	}
 }
