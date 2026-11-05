@@ -1,15 +1,15 @@
 package com.ecoembes.domain;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class UsageRecord {
-	private LocalDate date;
+	private LocalDateTime date;
 	private int numContainers;
 	private FillLevel fillLevel;
 	
 	//CONSTRUCTOR
 	
-	public UsageRecord(LocalDate date, int numContainers, FillLevel fillLevel) {
+	public UsageRecord(LocalDateTime date, int numContainers, FillLevel fillLevel) {
 		super();
 		this.date = date;
 		this.numContainers = numContainers;
@@ -18,11 +18,11 @@ public class UsageRecord {
 	
 	//GETTERS & SETTERS
 	
-	public LocalDate getDate() {
+	public LocalDateTime getDate() {
 		return date;
 	}
 
-	public void setDate(LocalDate date) {
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
 

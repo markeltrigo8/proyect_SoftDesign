@@ -1,24 +1,25 @@
 package com.ecoembes.domain;
 
-import java.time.LocalDate;
+
+import java.time.LocalDateTime;
 
 public class Assigment {
-	private LocalDate date;
+	private LocalDateTime date;
 	private int totalDumpsters;
 	private int totalContainers;
 	// CONSTRUCTOR
-	public Assigment(LocalDate date, int totalDumpsters, int totalContainers) {
+	public Assigment(LocalDateTime date, int totalDumpsters, int totalContainers) {
 		super();
 		this.date = date;
 		this.totalDumpsters = totalDumpsters;
 		this.totalContainers = totalContainers;
 	}
 	// GETTERS & SETTERS
-	public LocalDate getDate() {
+	public LocalDateTime getDate() {
 		return date;
 	}
 
-	public void setDate(LocalDate date) {
+	public void setDate(LocalDateTime date) {
 		this.date = date;
 	}
 

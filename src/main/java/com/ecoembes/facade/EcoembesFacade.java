@@ -1,5 +1,6 @@
 package com.ecoembes.facade;
 
-public class EcoembesFacade {
 
+public class EcoembesFacade {
+	
 }
