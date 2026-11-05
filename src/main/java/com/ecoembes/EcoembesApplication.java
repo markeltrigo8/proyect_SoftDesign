@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class ProyectSoftDesignApplication {
+public class EcoembesApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ProyectSoftDesignApplication.class, args);
+		SpringApplication.run(EcoembesApplication.class, args);
 	}
 
 }
