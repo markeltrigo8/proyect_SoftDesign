@@ -5,12 +5,28 @@ import java.util.List;
 import java.util.Objects;
 
 public class AssigmentDTO {
-	LocalDate date;
-	int recyclingPlantId;
-	String employeeEmail;
-	List<Integer> containersId;
-	int totalContainers;
-	int totalDumpsters;
+	private LocalDate date;
+	private int recyclingPlantId;
+	private String employeeEmail;
+	private List<Integer> dumpstersId;
+	private int totalContainers;
+	private int totalDumpsters;
+	
+	//CONSTRUCTOR
+	
+	public AssigmentDTO(LocalDate date, int recyclingPlantId, String employeeEmail, List<Integer> dumpstersId,
+			int totalContainers, int totalDumpsters) {
+		super();
+		this.date = date;
+		this.recyclingPlantId = recyclingPlantId;
+		this.employeeEmail = employeeEmail;
+		this.dumpstersId = dumpstersId;
+		this.totalContainers = totalContainers;
+		this.totalDumpsters = totalDumpsters;
+	}
+	
+	//GETTERS Y SETTERS
+	
 	public LocalDate getDate() {
 		return date;
 	}
@@ -30,10 +46,10 @@ public class AssigmentDTO {
 		this.employeeEmail = employeeEmail;
 	}
 	public List<Integer> getContainersId() {
-		return containersId;
+		return dumpstersId;
 	}
 	public void setContainersId(List<Integer> containersId) {
-		this.containersId = containersId;
+		this.dumpstersId = containersId;
 	}
 	public int getTotalContainers() {
 		return totalContainers;
@@ -49,7 +65,7 @@ public class AssigmentDTO {
 	}
 	@Override
 	public int hashCode() {
-		return Objects.hash(containersId, date, employeeEmail);
+		return Objects.hash(dumpstersId, date, employeeEmail);
 	}
 	@Override
 	public boolean equals(Object obj) {
@@ -60,7 +76,7 @@ public class AssigmentDTO {
 		if (getClass() != obj.getClass())
 			return false;
 		AssigmentDTO other = (AssigmentDTO) obj;
-		return Objects.equals(containersId, other.containersId) && Objects.equals(date, other.date)
+		return Objects.equals(dumpstersId, other.dumpstersId) && Objects.equals(date, other.date)
 				&& Objects.equals(employeeEmail, other.employeeEmail);
 	}
 	

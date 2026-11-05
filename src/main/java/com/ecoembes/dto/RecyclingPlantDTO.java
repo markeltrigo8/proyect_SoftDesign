@@ -4,16 +4,32 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 public class RecyclingPlantDTO {
-	int id;
-	String name;
-	LocalDate date;
-	double capacity;
+	private int id;
+	private String name;
+	private LocalDate date;
+	private double capacity;
+	
+	//CONSTRUCTOR
+	
+	public RecyclingPlantDTO(int id, String name, LocalDate date, double capacity) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.date = date;
+		this.capacity = capacity;
+	}
+	
+	//GETTERS Y SETTERS	
+	
+	
 	public int getId() {
 		return id;
 	}
+
 	public void setId(int id) {
 		this.id = id;
 	}
+
 	public String getName() {
 		return name;
 	}

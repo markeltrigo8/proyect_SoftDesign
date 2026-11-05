@@ -3,13 +3,17 @@ package com.ecoembes.dto;
 import java.util.Objects;
 
 public class CredentialsDTO {
-	String email;
-	String password;
+	private String email;
+	private String password;
+	
+	//CONSTRUCTOR
 	
 	CredentialsDTO(String email, String password) {
 		this.email = email;
 		this.password = password;
 	}
+	
+	//GETTERS AND SETTERS
 
 	public String getEmail() {
 		return email;
