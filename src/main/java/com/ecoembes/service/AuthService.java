@@ -14,6 +14,10 @@ public class AuthService {
 	private Map<String, Employee> employeeRepository = new ConcurrentHashMap<>();
 	private Map<String, Employee> tokenRepository = new ConcurrentHashMap<>();
 	
+	public void addEmployee(Employee employee) {
+		employeeRepository.put(employee.getEmail(), employee);
+	}
+	
 	public Optional<String> login(String email, String password ) {
 		if (email ==null || password == null) {
 			return Optional.empty();
@@ -45,8 +49,8 @@ public class AuthService {
 	}
 
 
-	public Employee getEmployeeByToken(String token) {
-		return tokenRepository.get(token);
+	public Optional<Employee> getEmployeeByToken(String token) {
+		return Optional.ofNullable(tokenRepository.get(token));
 	}
 	
 }

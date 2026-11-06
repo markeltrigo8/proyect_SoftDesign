@@ -1,5 +1,8 @@
 package com.ecoembes.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Dumpster {
 	private int id;
 	private String location;
@@ -7,6 +10,7 @@ public class Dumpster {
 	private int capacity;
 	private int numContainers;
 	private FillLevel fillLevel;
+	private List<UsageRecord> usageHistory = new ArrayList<>();
 	
 	
 	//CONSTRUCTOR
@@ -81,6 +85,14 @@ public class Dumpster {
 	public void setFillLevel(FillLevel fillLevel) {
 		this.fillLevel = fillLevel;
 	}
-	
-	
+
+	// HISTORIAL DE USO
+
+	public void addUsageRecord(UsageRecord record) {
+		this.usageHistory.add(record);
+	}
+
+	public List<UsageRecord> getUsageHistory() {
+		return new ArrayList<>(usageHistory);
+	}
 }
