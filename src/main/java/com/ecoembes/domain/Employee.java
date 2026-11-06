@@ -1,7 +1,5 @@
 package com.ecoembes.domain;
 
-import org.springframework.util.DigestUtils;
-
 public class Employee {
 	private String name;
 	private String email;

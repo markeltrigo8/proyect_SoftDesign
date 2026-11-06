@@ -30,9 +30,23 @@ public class AuthService {
 			return Optional.empty();
 		}
 	}
+	
+	public Optional<Boolean> logout(String token) {
+		if (token == null || !tokenRepository.containsKey(token)) {
+			return Optional.empty();
+		}
+		
+		tokenRepository.remove(token);
+		return Optional.of(true);
+	}
 
 	private static String generateToken() {
 		return UUID.randomUUID().toString();
 	}
 
+
+	public Employee getEmployeeByToken(String token) {
+		return tokenRepository.get(token);
+	}
+	
 }
