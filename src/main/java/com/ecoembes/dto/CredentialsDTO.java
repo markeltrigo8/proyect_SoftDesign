@@ -8,7 +8,10 @@ public class CredentialsDTO {
 	
 	//CONSTRUCTOR
 	
-	CredentialsDTO(String email, String password) {
+	public CredentialsDTO() {
+	}
+
+	public CredentialsDTO(String email, String password) {
 		this.email = email;
 		this.password = password;
 	}

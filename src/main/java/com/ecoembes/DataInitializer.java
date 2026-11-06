@@ -54,7 +54,7 @@ public class DataInitializer {
 
 			logger.info("Recycling plants saved!");
 
-			// ---------- Contenedores (dumpsters) ----------
+			// ---------- Contenedores ----------
 			Dumpster d1 = createDumpster(1, "Gran Vía 45, Bilbao", 48011, 20, 5);
 			Dumpster d2 = createDumpster(2, "Calle Autonomía 12, Bilbao", 48010, 20, 12);
 			Dumpster d3 = createDumpster(3, "Avenida Lehendakari Aguirre 30, Bilbao", 48014, 25, 22);
