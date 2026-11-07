@@ -1,5 +1,11 @@
 package com.ecoembes.facade;
 
-public class DumpsterController {
+import com.ecoembes.service.DumpsterService;
 
+public class DumpsterController {
+	private DumpsterService dumpsterService;
+	
+	public DumpsterController (DumpsterService ds) {
+		this.dumpsterService = ds;
+	}
 }

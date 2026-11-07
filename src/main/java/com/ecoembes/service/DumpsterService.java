@@ -26,4 +26,11 @@ public class DumpsterService {
 	public List<Dumpster> getAllDumpsters() {
 		return new ArrayList<>(dumpsterRepository.values());
 	}
+	public int calculateTotalCont(List<Integer> dumpstersID) {
+		int result = 0;
+		for (int id : dumpstersID) {
+			result += dumpsterRepository.get(id).getNumContainers();
+		}
+		return result;
+	}
 }
