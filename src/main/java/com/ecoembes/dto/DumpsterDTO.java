@@ -2,17 +2,19 @@ package com.ecoembes.dto;
 
 import java.util.Objects;
 
+import com.ecoembes.domain.FillLevel;
+
 public class DumpsterDTO {
 	private int id;
 	private String location;
 	private int postalCode;
 	private int capacity;
 	private int numContainers;
-	private String fillLevel;
+	private FillLevel fillLevel;
 	
 	//CONSTRUCTOR
 	
-	public DumpsterDTO(int id, String location, int postalCode, int capacity, int numContainers, String fillLevel) {
+	public DumpsterDTO(int id, String location, int postalCode, int capacity, int numContainers, FillLevel fillLevel) {
 		this.id = id;
 		this.location = location;
 		this.postalCode = postalCode;
@@ -53,10 +55,10 @@ public class DumpsterDTO {
 	public void setNumContainers(int numContainers) {
 		this.numContainers = numContainers;
 	}
-	public String getFillLevel() {
+	public FillLevel getFillLevel() {
 		return fillLevel;
 	}
-	public void setFillLevel(String fillLevel) {
+	public void setFillLevel(FillLevel fillLevel) {
 		this.fillLevel = fillLevel;
 	}
 	@Override

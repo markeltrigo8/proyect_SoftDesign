@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ecoembes.domain.Assigment;
 import com.ecoembes.domain.Employee;
@@ -67,7 +69,7 @@ public class RecyclingPlantService {
 	
 	public AssigmentDTO assignDumpsterToRecyclingPlant (String token, AssigmentRequestDTO request) {
 		
-		
+		authenticate(token);
 		//Get employee
 		Optional<Employee> employee = authService.getEmployeeByToken(token);
 		
@@ -82,7 +84,7 @@ public class RecyclingPlantService {
 		
 		//Check availability
 		if (!IsAvailable(plant.getTotalCapacity(), totalCont)) {
-			 throw new IllegalStateException("La planta no tiene capacidad suficiente");
+			 throw new IllegalStateException("The plant does not have enough capacity");
         }
 		
 		Assigment assigment = createAssigment(request.getRecyclingPlantId(), dumpsterID, LocalDateTime.now(), totalDump, totalCont, employee);
@@ -109,5 +111,12 @@ public class RecyclingPlantService {
 	private void updateCapacity(int plantID, double capacityUsed) {
 		RecyclingPlant plant = recyclingPlantRepository.get(plantID);
 		plant.setCapacity(plant.getTotalCapacity()- capacityUsed);
+	}
+	
+
+	private Employee authenticate(String token) {
+		
+		return authService.getEmployeeByToken(token).orElseThrow(()->new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or missing token"));
+		
 	}
 }
