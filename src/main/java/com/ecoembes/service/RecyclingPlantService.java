@@ -1,5 +1,6 @@
 package com.ecoembes.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
 
+import com.ecoembes.domain.Assigment;
 import com.ecoembes.domain.Employee;
 import com.ecoembes.domain.RecyclingPlant;
 import com.ecoembes.dto.AssigmentDTO;
@@ -21,6 +23,11 @@ public class RecyclingPlantService {
 	private Map<Integer, RecyclingPlant> recyclingPlantRepository = new ConcurrentHashMap<>();
 	private AuthService authService;
 	private DumpsterService dumpsterService;
+
+	public RecyclingPlantService(AuthService authService, DumpsterService dumpsterService) {
+	    this.authService = authService;
+	    this.dumpsterService = dumpsterService;
+	}
 	
 	public void addRecyclingPlant(RecyclingPlant plant) {
 		recyclingPlantRepository.put(plant.getId(), plant);
@@ -59,7 +66,7 @@ public class RecyclingPlantService {
 	}
 	
 	public AssigmentDTO assignDumpsterToRecyclingPlant (String token, AssigmentRequestDTO request) {
-		AssigmentDTO result = null;
+		
 		
 		//Get employee
 		Optional<Employee> employee = authService.getEmployeeByToken(token);
@@ -68,9 +75,39 @@ public class RecyclingPlantService {
 		
 		//Calculate total cont
 		int totalCont = dumpsterService.calculateTotalCont(dumpsterID);
+		int totalDump = dumpsterID.size();
 		
+		//Get plant
+		RecyclingPlant plant = getPlant(request.getRecyclingPlantId());
 		
+		//Check availability
+		if (!IsAvailable(plant.getTotalCapacity(), totalCont)) {
+			 throw new IllegalStateException("La planta no tiene capacidad suficiente");
+        }
 		
-		return result;
+		Assigment assigment = createAssigment(request.getRecyclingPlantId(), dumpsterID, LocalDateTime.now(), totalDump, totalCont, employee);
+		
+		updateCapacity(request.getRecyclingPlantId(), totalCont);
+	
+		return new AssigmentDTO(LocalDate.now(), request.getRecyclingPlantId(), employee.get().getEmail(), dumpsterID, totalCont, totalDump);
+	}
+	public RecyclingPlant getPlant (int id) {
+		return recyclingPlantRepository.get(id);
+		
+	}
+	public boolean IsAvailable (double plantCap, int totalCont) {
+		return plantCap >= totalCont;
+	}
+	private Assigment createAssigment(int plantID, List<Integer> dumpstersID, LocalDateTime date, int totalDump, int totalCont, Optional<Employee> employee ) {
+		Assigment assigment = new Assigment(date, totalDump, totalCont);
+		
+		RecyclingPlant plant = recyclingPlantRepository.get(plantID);
+		plant.addAssigment(assigment);
+		
+		return assigment;
+	}
+	private void updateCapacity(int plantID, double capacityUsed) {
+		RecyclingPlant plant = recyclingPlantRepository.get(plantID);
+		plant.setCapacity(plant.getTotalCapacity()- capacityUsed);
 	}
 }

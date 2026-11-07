@@ -55,5 +55,8 @@ public class RecyclingPlant {
 	     return result;
 		 
 	 }
+	 public void addAssigment (Assigment a) {
+		 this.assigments.add(a);
+	 }
 
 }
