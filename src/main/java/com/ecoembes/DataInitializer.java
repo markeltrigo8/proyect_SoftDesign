@@ -44,9 +44,9 @@ public class DataInitializer {
 			logger.info("Employees saved!");
 
 			// ---------- Plantas de reciclaje ----------
-			RecyclingPlant plant1 = new RecyclingPlant("PLANT-001", "Ecoplanta Bilbao Norte", 120.0);
-			RecyclingPlant plant2 = new RecyclingPlant("PLANT-002", "Ecoplanta Ezkerraldea", 85.5);
-			RecyclingPlant plant3 = new RecyclingPlant("PLANT-003", "Ecoplanta Uribe Kosta", 60.0);
+			RecyclingPlant plant1 = new RecyclingPlant(1, "Ecoplanta Bilbao Norte", 120.0);
+			RecyclingPlant plant2 = new RecyclingPlant(2, "Ecoplanta Ezkerraldea", 85.5);
+			RecyclingPlant plant3 = new RecyclingPlant(3, "Ecoplanta Uribe Kosta", 60.0);
 
 			recyclingPlantService.addRecyclingPlant(plant1);
 			recyclingPlantService.addRecyclingPlant(plant2);
