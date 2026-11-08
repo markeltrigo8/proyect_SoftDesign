@@ -65,7 +65,7 @@ public class DumpsterService {
 		Dumpster dumpster = new Dumpster(dto.getId(),dto.getLocation(), dto.getPostalCode(), dto.getCapacity(), 0, FillLevel.GREEN);
 		
 		//IAG funcion hecha con ayudada de la IA
-		if(dumpsterRepository.putIfAbsent(dumpster.getCapacity(), dumpster) != null) {
+		if(dumpsterRepository.putIfAbsent(dumpster.getId(), dumpster) != null) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "The dumpster alreday exists");
 		}
 		

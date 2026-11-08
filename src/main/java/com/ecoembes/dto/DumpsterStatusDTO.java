@@ -8,6 +8,9 @@ public class DumpsterStatusDTO {
 	
 	//CONSTRUCTOR
 	
+	public DumpsterStatusDTO() {
+	}
+	
 	public DumpsterStatusDTO(int postalCode, LocalDateTime date) {
 		super();
 		this.postalCode = postalCode;

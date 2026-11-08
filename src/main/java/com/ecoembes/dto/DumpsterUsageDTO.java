@@ -10,6 +10,10 @@ public class DumpsterUsageDTO {
 	
 	//CONSTRUCTOR
 	
+	public DumpsterUsageDTO() {
+		super();
+	}
+	
 	public DumpsterUsageDTO(LocalDateTime date, int numContainers, String fillLevel) {
 		this.date = date;
 		this.numContainers = numContainers;

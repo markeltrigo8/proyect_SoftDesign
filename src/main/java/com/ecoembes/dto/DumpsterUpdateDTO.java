@@ -7,6 +7,9 @@ public class DumpsterUpdateDTO {
 	
 	//CONSTRUCTOR
 	
+	public DumpsterUpdateDTO() {
+	}
+	
 	public DumpsterUpdateDTO(int dumpsterId, int numContainers, String fillLevel) {
 		super();
 		this.dumpsterId = dumpsterId;

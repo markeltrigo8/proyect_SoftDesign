@@ -14,6 +14,10 @@ public class AssigmentDTO {
 	
 	//CONSTRUCTOR
 	
+	public AssigmentDTO() {
+		super();
+	}
+	
 	public AssigmentDTO(LocalDate date, int recyclingPlantId, String employeeEmail, List<Integer> dumpstersId,
 			int totalContainers, int totalDumpsters) {
 		super();

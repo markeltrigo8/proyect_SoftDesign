@@ -14,6 +14,9 @@ public class DumpsterDTO {
 	
 	//CONSTRUCTOR
 	
+	public DumpsterDTO() {
+	}
+	
 	public DumpsterDTO(int id, String location, int postalCode, int capacity, int numContainers, FillLevel fillLevel) {
 		this.id = id;
 		this.location = location;

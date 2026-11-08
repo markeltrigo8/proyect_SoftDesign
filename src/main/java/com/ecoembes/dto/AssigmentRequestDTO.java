@@ -8,6 +8,10 @@ public class AssigmentRequestDTO {
 	
 	//CONSTRUCTOR
 	
+	public AssigmentRequestDTO() {
+		super();
+	}
+	
 	public AssigmentRequestDTO(int recyclingPlantId, List<Integer> dumpsterIds) {
 		super();
 		this.recyclingPlantId = recyclingPlantId;

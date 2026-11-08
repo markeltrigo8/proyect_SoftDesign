@@ -11,6 +11,9 @@ public class RecyclingPlantDTO {
 	
 	//CONSTRUCTOR
 	
+	public RecyclingPlantDTO() {
+	}
+	
 	public RecyclingPlantDTO(int id, String name, LocalDate date, double capacity) {
 		super();
 		this.id = id;
