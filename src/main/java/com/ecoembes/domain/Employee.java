@@ -1,15 +1,20 @@
 package com.ecoembes.domain;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Employee {
 	private String name;
 	private String email;
 	private String password;
+	private List<Assigment> assigments = new ArrayList<>();
 	
 	public Employee(String name, String email, String password) {
 		super();
 		this.name = name;
 		this.email = email;
 		this.password = password;
+		
 	}
 
 	public String getName() {
@@ -38,5 +43,11 @@ public class Employee {
 	
 	public boolean checkPassword(String password) {
 		return this.password.equals(password);
+	}
+	public List<Assigment> getEmployeeAsigments(){
+		return this.assigments;
+	}
+	public void setAssigments (List<Assigment> a) {
+		this.assigments = a;
 	}
 }

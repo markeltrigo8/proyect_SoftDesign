@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import com.ecoembes.domain.Assigment;
+import com.ecoembes.domain.Dumpster;
 import com.ecoembes.domain.Employee;
 import com.ecoembes.domain.RecyclingPlant;
 import com.ecoembes.dto.AssigmentDTO;
@@ -101,9 +102,14 @@ public class RecyclingPlantService {
 		return plantCap >= totalCont;
 	}
 	private Assigment createAssigment(int plantID, List<Integer> dumpstersID, LocalDateTime date, int totalDump, int totalCont, Optional<Employee> employee ) {
-		Assigment assigment = new Assigment(date, totalDump, totalCont);
+		List<Dumpster> dumpsters = new ArrayList<Dumpster>();
+		for(Integer i : dumpstersID) {
+			Dumpster dumpster = dumpsterService.findDumpster(i);
+			dumpsters.add(dumpster);
+		}
 		
 		RecyclingPlant plant = recyclingPlantRepository.get(plantID);
+		Assigment assigment = new Assigment(date, totalDump, totalCont, employee.orElse(null), plant, dumpsters );
 		plant.addAssigment(assigment);
 		
 		return assigment;

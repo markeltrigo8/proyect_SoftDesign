@@ -6,14 +6,16 @@ public class UsageRecord {
 	private LocalDateTime date;
 	private int numContainers;
 	private FillLevel fillLevel;
+	private Dumpster dumpster;
 	
 	//CONSTRUCTOR
 	
-	public UsageRecord(LocalDateTime date, int numContainers, FillLevel fillLevel) {
+	public UsageRecord(LocalDateTime date, int numContainers, FillLevel fillLevel, Dumpster dumpster) {
 		super();
 		this.date = date;
 		this.numContainers = numContainers;
 		this.fillLevel = fillLevel;
+		this.dumpster = dumpster;
 	}
 	
 	//GETTERS & SETTERS
@@ -40,5 +42,14 @@ public class UsageRecord {
 
 	public void setFillLevel(FillLevel fillLevel) {
 		this.fillLevel = fillLevel;
-	}	
+	}
+
+	public Dumpster getDumpster() {
+		return dumpster;
+	}
+
+	public void setDumpster(Dumpster dumpster) {
+		this.dumpster = dumpster;
+	}
+	
 }

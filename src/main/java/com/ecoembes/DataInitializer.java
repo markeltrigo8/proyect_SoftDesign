@@ -3,6 +3,7 @@
 package com.ecoembes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,7 +113,8 @@ public class DataInitializer {
 			UsageRecord record = new UsageRecord(
 					now.minusDays(daysAgo),
 					numContainers,
-					calculateFillLevel(numContainers, dumpster.getCapacity()));
+					calculateFillLevel(numContainers, dumpster.getCapacity()),
+					dumpster);
 
 			dumpster.addUsageRecord(record);
 		}

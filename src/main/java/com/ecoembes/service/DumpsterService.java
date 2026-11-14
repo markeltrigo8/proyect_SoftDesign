@@ -111,7 +111,11 @@ public class DumpsterService {
 		FillLevel fillLevel = parseFillLevel(dto.getFillLevel());
 		dumpster.setNumContainers(dto.getNumContainers());
 		dumpster.setFillLevel(fillLevel);
-		dumpster.addUsageRecord(new UsageRecord(LocalDateTime.now(), dto.getNumContainers(), fillLevel));
+		dumpster.addUsageRecord(new UsageRecord(LocalDateTime.now(), dto.getNumContainers(), fillLevel, dumpster));
+	}
+
+	public Dumpster findDumpster(int dumpsterID) {
+		return getDumpster(dumpsterID).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, 	"Dumpster not found: "+ dumpsterID));
 	}
 	
 	//Funcion auxiliar creada con IAG
@@ -146,12 +150,6 @@ public class DumpsterService {
 		
 		return new DumpsterUsageDTO(date, numContainers, fillLevel.name());
 	}
-
-
-	private Dumpster findDumpster(int dumpsterID) {
-		return getDumpster(dumpsterID).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, 	"Dumpster not found: "+ dumpsterID));
-	}
-
 
 	private Employee authenticate(String token) {
 		

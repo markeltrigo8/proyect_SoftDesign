@@ -11,6 +11,7 @@ public class Dumpster {
 	private int numContainers;
 	private FillLevel fillLevel;
 	private List<UsageRecord> usageHistory = new ArrayList<>();
+	private List<Assigment> assigments = new ArrayList<>();
 	
 	
 	//CONSTRUCTOR
@@ -94,5 +95,13 @@ public class Dumpster {
 
 	public List<UsageRecord> getUsageHistory() {
 		return new ArrayList<>(usageHistory);
+	}
+
+	public List<Assigment> getAssigments() {
+		return assigments;
+	}
+
+	public void setAssigments(List<Assigment> assigments) {
+		this.assigments = assigments;
 	}
 }
