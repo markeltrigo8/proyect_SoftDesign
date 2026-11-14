@@ -30,7 +30,7 @@ public class AuthController {
     // Login endpoint
     @Operation(
         summary = "Login to the system",
-        description = "Allows a user to login by providing email and password. Returns a token if successful.",
+        description = "Allows a use	r to login by providing email and password. Returns a token if successful.",
         responses = {
             @ApiResponse(responseCode = "200", description = "OK: Login successful, returns a token"),
             @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid credentials, login failed"),

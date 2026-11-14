@@ -50,6 +50,9 @@ public class AuthService {
 
 
 	public Optional<Employee> getEmployeeByToken(String token) {
+		if (token == null) {
+			return Optional.empty();
+		}
 		return Optional.ofNullable(tokenRepository.get(token));
 	}
 	

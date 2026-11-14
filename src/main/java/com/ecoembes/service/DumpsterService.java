@@ -55,14 +55,14 @@ public class DumpsterService {
 	}
 	
 	
-	public void createDumpster(String token, DumpsterDTO dto) {
+	public void createDumpster(String token, int id, String location, int postalCode, int capacity) {
 		authenticate(token);
-		if(dto == null || dto.getLocation() == null || dto.getLocation().isBlank() || dto.getCapacity() <=0) {
+		if(location == null || location.isBlank() || capacity <=0) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location and a capacity bigger than 0 is required");
 			
 		}
 		
-		Dumpster dumpster = new Dumpster(dto.getId(),dto.getLocation(), dto.getPostalCode(), dto.getCapacity(), 0, FillLevel.GREEN);
+		Dumpster dumpster = new Dumpster(id, location, postalCode, capacity, 0, FillLevel.GREEN);
 		
 		//IAG funcion hecha con ayudada de la IA
 		if(dumpsterRepository.putIfAbsent(dumpster.getId(), dumpster) != null) {
@@ -71,7 +71,7 @@ public class DumpsterService {
 		
 	}
 	
-	public List<DumpsterUsageDTO> queryDumpster(String token, int dumpsterID, LocalDate startDate, LocalDate endDate){
+	public List<UsageRecord> queryDumpster(String token, int dumpsterID, LocalDate startDate, LocalDate endDate){
 		authenticate(token);
 		Dumpster dumpster = findDumpster(dumpsterID);
 		if(startDate == null || endDate == null || startDate.isAfter(endDate)) {
@@ -79,62 +79,43 @@ public class DumpsterService {
 			
 		}
 		
-		List<DumpsterUsageDTO> result = new ArrayList<DumpsterUsageDTO>();
+		List<UsageRecord> result = new ArrayList<>();
 		for (UsageRecord r : dumpster.getUsageHistory()) {
 			LocalDate d = r.getDate().toLocalDate();
 			if(!d.isBefore(startDate)&&!d.isAfter(endDate)) {
-				result.add(createDumpsterUsageDTO(r.getDate(), r.getNumContainers(), r.getFillLevel()));
+				result.add(r);
 			}
 		}
 		return result;
 	}
 
-	public List<DumpsterDTO> checkDumpsterStatus(String token, DumpsterStatusDTO dumpster){
+	public List<Dumpster> checkDumpsterStatus(String token, int postalCode, LocalDate date){
 		authenticate(token);
-		LocalDate day = dumpster.getDate().toLocalDate();
-		List<DumpsterDTO> result = new ArrayList<DumpsterDTO>();
-		
-		for (Dumpster d : dumpsterRepository.values()) {
-			if(d.getPostalCode() != dumpster.getPostalCode()) {
+		List<Dumpster> result = new ArrayList<>();
+		for(Dumpster d: dumpsterRepository.values()) {
+			if (d.getPostalCode() != postalCode) {
 				continue;
 			}
-			//Hecho con la ayuda de IAG 
-			findRecordByDay(d, day).ifPresent(r ->result.add(createDumpsterDTO(d.getId(), d.getLocation(), d.getPostalCode(),d.getCapacity(), d.getNumContainers(), d.getFillLevel())));
-			
+			if (findRecordByDay(d, date).isPresent()) {
+				result.add(d);
+			}
 		}
 		
 		return result;
 	}
 	
-	public void transmitUpdates(DumpsterUpdateDTO dto) {
-		Dumpster dumpster = findDumpster(dto.getDumpsterId());
-		FillLevel fillLevel = parseFillLevel(dto.getFillLevel());
-		dumpster.setNumContainers(dto.getNumContainers());
+	public void transmitUpdates(int dumpsterId, int numContainers, FillLevel fillLevel) {
+		Dumpster dumpster = findDumpster(dumpsterId);
+		dumpster.setNumContainers(numContainers);
 		dumpster.setFillLevel(fillLevel);
-		dumpster.addUsageRecord(new UsageRecord(LocalDateTime.now(), dto.getNumContainers(), fillLevel, dumpster));
+		dumpster.addUsageRecord(new UsageRecord(LocalDateTime.now(), numContainers, fillLevel, dumpster));
 	}
 
 	public Dumpster findDumpster(int dumpsterID) {
 		return getDumpster(dumpsterID).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, 	"Dumpster not found: "+ dumpsterID));
 	}
 	
-	//Funcion auxiliar creada con IAG
-	private FillLevel parseFillLevel(String value) {
-		try {
-			return FillLevel.valueOf(value.trim().toUpperCase());
-		} catch (IllegalArgumentException | NullPointerException e) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid fill level: " + value);
-		}
-	}
-
-
-	private DumpsterDTO createDumpsterDTO(int id, String location, int postalCode, int capacity, int numContainers,
-			FillLevel fillLevel) {
-		return new DumpsterDTO(id, location, postalCode, capacity, numContainers, fillLevel);
-	}
-
-
-
+	
 	private Optional<UsageRecord> findRecordByDay(Dumpster d, LocalDate day) {
 		UsageRecord found = null;
 		for(UsageRecord r : d.getUsageHistory()) {
@@ -143,12 +124,6 @@ public class DumpsterService {
 			}
 		}
 		return Optional.ofNullable(found);
-	}
-
-
-	private DumpsterUsageDTO createDumpsterUsageDTO(LocalDateTime date, int numContainers, FillLevel fillLevel) {
-		
-		return new DumpsterUsageDTO(date, numContainers, fillLevel.name());
 	}
 
 	private Employee authenticate(String token) {

@@ -1,7 +1,9 @@
 package com.ecoembes.facade;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.ecoembes.domain.Assigment;
+import com.ecoembes.domain.RecyclingPlant;
 import com.ecoembes.dto.AssigmentDTO;
 import com.ecoembes.dto.AssigmentRequestDTO;
 import com.ecoembes.dto.RecyclingPlantDTO;
@@ -52,11 +56,15 @@ public class RecyclingPlantController {
             @Parameter(name = "date", description = "Date to check, ISO format (yyyy-MM-dd)", required = true, example = "2026-11-08")
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
+    	
+    	Map<RecyclingPlant, Double> capacities = plantService.getCapacities(token, date.atStartOfDay());
         // 1.1: getCapacities(date). El service recibe LocalDateTime, así que se convierte.
-        List<RecyclingPlantDTO> capacities = plantService.getCapacities(date.atStartOfDay());
+        List<RecyclingPlantDTO> result = new ArrayList<>();
+        capacities.forEach((plant, capacity) -> result.add(createRecyclingPlantDTO(plant, date, capacity)));
+        
 
         // 1.2: List<RecyclingPlantDTO>
-        return ResponseEntity.ok(capacities);
+        return ResponseEntity.ok(result);
     }
 
     // 2: assignDumpsterToRecyclingPlant(token, request)
@@ -83,15 +91,25 @@ public class RecyclingPlantController {
             @RequestBody AssigmentRequestDTO request) {
 
         try {
-            // 2.1: assignDumpsterToRecyclingPlant(token, request)
-            AssigmentDTO assigmentDTO = plantService.assignDumpsterToRecyclingPlant(token, request);
-
-            // 2.1.11.1: assigmentDTO
-            return ResponseEntity.ok(assigmentDTO);
-
+            
+        	Assigment assigment = plantService.assignDumpsterToRecyclingPlant(token, request.getRecyclingPlantId(), request.getDumpsterIds());
+        	
+        	return ResponseEntity.ok(createAssigmentDTO(assigment, request));
+         
         } catch (IllegalStateException e) {
             // 2.2: 400 errorMessage (la planta no tiene capacidad suficiente)
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    
+    // Crear DTO
+    private RecyclingPlantDTO createRecyclingPlantDTO(RecyclingPlant plant, LocalDate date, double capacity) {
+        return new RecyclingPlantDTO(plant.getId(), plant.getName(), date, capacity);
+    }
+
+    private AssigmentDTO createAssigmentDTO(Assigment a, AssigmentRequestDTO request) {
+        return new AssigmentDTO(a.getDate().toLocalDate(), request.getRecyclingPlantId(),
+                a.getEmployee().getEmail(), request.getDumpsterIds(),
+                a.getTotalContainers(), a.getTotalDumpsters());
     }
 }

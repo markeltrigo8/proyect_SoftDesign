@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,7 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
+import com.ecoembes.domain.Dumpster;
+import com.ecoembes.domain.FillLevel;
+import com.ecoembes.domain.UsageRecord;
 import com.ecoembes.dto.DumpsterDTO;
 import com.ecoembes.dto.DumpsterStatusDTO;
 import com.ecoembes.dto.DumpsterUpdateDTO;
@@ -50,9 +55,9 @@ public class DumpsterController {
 			@Parameter(name = "token", description = "Authorization token obtained at login", required = true)
 			@RequestParam("token") String token,
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Dumpster data", required = true)
-			@RequestBody DumpsterDTO dumpsterDTO) {
+			@RequestBody DumpsterDTO dto) {
 
-		dumpsterService.createDumpster(token, dumpsterDTO);
+		dumpsterService.createDumpster(token, dto.getId(), dto.getLocation(), dto.getPostalCode(), dto.getCapacity());
 
 		return ResponseEntity.ok().build();
 	}
@@ -77,8 +82,9 @@ public class DumpsterController {
 			@RequestParam("startDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
 			@Parameter(name = "endDate", description = "End date, ISO format (yyyy-MM-dd)", required = true, example = "2026-11-08")
 			@RequestParam("endDate") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
-
-		List<DumpsterUsageDTO> usage = dumpsterService.queryDumpster(token, dumpsterId, startDate, endDate);
+		
+		List<UsageRecord> records = dumpsterService.queryDumpster(token, dumpsterId, startDate, endDate);
+		List<DumpsterUsageDTO> usage = records.stream().map(this::createDumpsterUsageDTO).toList();
 
 		return ResponseEntity.ok(usage);
 	}
@@ -99,7 +105,8 @@ public class DumpsterController {
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Postal code and date to check", required = true)
 			@RequestBody DumpsterStatusDTO dsdto) {
 
-		List<DumpsterDTO> dumpsters = dumpsterService.checkDumpsterStatus(token, dsdto);
+		List<Dumpster> found =dumpsterService.checkDumpsterStatus(token, dsdto.getPostalCode(), dsdto.getDate().toLocalDate());
+		List<DumpsterDTO> dumpsters = found.stream().map(this::createDumpsterDTO).toList();
 
 		return ResponseEntity.ok(dumpsters);
 	}
@@ -120,10 +127,28 @@ public class DumpsterController {
 			@RequestParam("token") String token,
 			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Dumpster update data", required = true)
 			@RequestBody DumpsterUpdateDTO dto) {
-
-		dumpsterService.transmitUpdates(dto);
+		
+		FillLevel fillLevel = parseFillLevel (dto.getFillLevel());
+		dumpsterService.transmitUpdates(dto.getDumpsterId(), dto.getNumContainers(), fillLevel);
+		
 
 		return ResponseEntity.ok().build();
 	}
+	// CONVERSION A DTO
+	private DumpsterDTO createDumpsterDTO(Dumpster d) {
+		return new DumpsterDTO(d.getId(), d.getLocation(), d.getPostalCode(), d.getCapacity(),
+				d.getNumContainers(), d.getFillLevel());
+	}
+	private DumpsterUsageDTO createDumpsterUsageDTO(UsageRecord r) {
+		return new DumpsterUsageDTO(r.getDate(), r.getNumContainers(), r.getFillLevel().name());
+	}
 
+	// Funcion auxiliar creada con IAG
+	private FillLevel parseFillLevel(String value) {
+		try {
+			return FillLevel.valueOf(value.trim().toUpperCase());
+		} catch (IllegalArgumentException | NullPointerException e) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid fill level: " + value);
+		}
+	}
 }

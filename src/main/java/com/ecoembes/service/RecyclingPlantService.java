@@ -3,6 +3,7 @@ package com.ecoembes.service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,75 +48,67 @@ public class RecyclingPlantService {
 	public List<RecyclingPlant> getAllRecyclingPlants() {
 		return new ArrayList<>(recyclingPlantRepository.values());
 	}
-	public List<RecyclingPlantDTO> getCapacities (LocalDateTime date){
-		List<RecyclingPlantDTO> result = new ArrayList<RecyclingPlantDTO>();
+	public Map<RecyclingPlant, Double> getCapacities (String token, LocalDateTime date){
+		authenticate(token);
+		Map<RecyclingPlant, Double> result = new LinkedHashMap<>();
 		
-		//Get recycling plants
-		List<RecyclingPlant> plants = getRecyclingPlants();
-		
-		//Calcular la capacidad
-		for (RecyclingPlant r : plants) {
-			double availableCapacity = getAvailableCapacity(date, r);
-			
-			RecyclingPlantDTO rp = new RecyclingPlantDTO(r.getId(), r.getName(), date.toLocalDate(), availableCapacity);
-			
-			result.add(rp);
+		for (RecyclingPlant r : getAllRecyclingPlants()) {
+			result.put(r, getAvailableCapacity(date, r));
 		}
-		return result;	
+		return result;
 	}
 	public double getAvailableCapacity (LocalDateTime date, RecyclingPlant plant) {
 		
 		return plant.getTotalCapacity() - plant.getAssignedCapacity(date);
 	}
 	
-	public AssigmentDTO assignDumpsterToRecyclingPlant (String token, AssigmentRequestDTO request) {
+	public Assigment assignDumpsterToRecyclingPlant (String token, int plantId, List<Integer> dumpsterIds ) {
 		
-		authenticate(token);
-		//Get employee
-		Optional<Employee> employee = authService.getEmployeeByToken(token);
-		
-		List<Integer> dumpsterID = request.getDumpsterIds();
+		Employee employee = authenticate(token);
 		
 		//Calculate total cont
-		int totalCont = dumpsterService.calculateTotalCont(dumpsterID);
-		int totalDump = dumpsterID.size();
+		int totalCont = dumpsterService.calculateTotalCont(dumpsterIds);
+		int totalDump = dumpsterIds.size();
 		
 		//Get plant
-		RecyclingPlant plant = getPlant(request.getRecyclingPlantId());
+		RecyclingPlant plant = getPlant(plantId);
 		
 		//Check availability
 		if (!IsAvailable(plant.getTotalCapacity(), totalCont)) {
 			 throw new IllegalStateException("The plant does not have enough capacity");
         }
 		
-		Assigment assigment = createAssigment(request.getRecyclingPlantId(), dumpsterID, LocalDateTime.now(), totalDump, totalCont, employee);
+		Assigment assigment = createAssigment(plant, dumpsterIds, LocalDateTime.now(), totalDump, totalCont, employee);
 		
-		updateCapacity(request.getRecyclingPlantId(), totalCont);
+		updateCapacity(plant, totalCont);
 	
-		return new AssigmentDTO(LocalDate.now(), request.getRecyclingPlantId(), employee.get().getEmail(), dumpsterID, totalCont, totalDump);
+		return assigment;
 	}
 	public RecyclingPlant getPlant (int id) {
-		return recyclingPlantRepository.get(id);
+		RecyclingPlant plant = recyclingPlantRepository.get(id);
+		if (plant == null) {
+			throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Recycling plant not found: " + id);
+		}
+		return plant;
 		
 	}
 	public boolean IsAvailable (double plantCap, int totalCont) {
 		return plantCap >= totalCont;
 	}
-	private Assigment createAssigment(int plantID, List<Integer> dumpstersID, LocalDateTime date, int totalDump, int totalCont, Optional<Employee> employee ) {
+	private Assigment createAssigment(RecyclingPlant plant, List<Integer> dumpstersID, LocalDateTime date, int totalDump, int totalCont, Employee employee ) {
 		List<Dumpster> dumpsters = new ArrayList<Dumpster>();
 		for(Integer i : dumpstersID) {
 			Dumpster dumpster = dumpsterService.findDumpster(i);
 			dumpsters.add(dumpster);
 		}
 		
-		RecyclingPlant plant = recyclingPlantRepository.get(plantID);
-		Assigment assigment = new Assigment(date, totalDump, totalCont, employee.orElse(null), plant, dumpsters );
+		
+		Assigment assigment = new Assigment(date, totalDump, totalCont, employee, plant, dumpsters );
 		plant.addAssigment(assigment);
 		
 		return assigment;
 	}
-	private void updateCapacity(int plantID, double capacityUsed) {
-		RecyclingPlant plant = recyclingPlantRepository.get(plantID);
+	private void updateCapacity(RecyclingPlant plant, double capacityUsed) {
 		plant.setCapacity(plant.getTotalCapacity()- capacityUsed);
 	}
 	
