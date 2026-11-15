@@ -2,6 +2,7 @@ package com.ecoembes.domain;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Dumpster {
 	private int id;
@@ -10,8 +11,8 @@ public class Dumpster {
 	private int capacity;
 	private int numContainers;
 	private FillLevel fillLevel;
-	private List<UsageRecord> usageHistory = new ArrayList<>();
-	private List<Assigment> assigments = new ArrayList<>();
+	private List<UsageRecord> usageHistory = new CopyOnWriteArrayList<>();
+	private List<Assigment> assigments = new CopyOnWriteArrayList<>();
 	
 	
 	//CONSTRUCTOR
@@ -95,6 +96,10 @@ public class Dumpster {
 
 	public List<UsageRecord> getUsageHistory() {
 		return new ArrayList<>(usageHistory);
+	}
+
+	public void addAssigment(Assigment a) {
+		this.assigments.add(a);
 	}
 
 	public List<Assigment> getAssigments() {

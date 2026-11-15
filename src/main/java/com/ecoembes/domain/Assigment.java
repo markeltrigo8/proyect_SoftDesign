@@ -3,9 +3,6 @@ package com.ecoembes.domain;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-
-import org.aspectj.weaver.Dump;
 
 public class Assigment {
 	private LocalDateTime date;
@@ -14,6 +11,7 @@ public class Assigment {
 	private Employee employee;
 	private RecyclingPlant recyclingPlant;
 	private List<Dumpster> dumpsters;
+	
 	// CONSTRUCTOR
 	public Assigment(LocalDateTime date, int totalDumpsters, int totalContainers, Employee employee, RecyclingPlant rp, List<Dumpster> dumpsters) {
 		super();

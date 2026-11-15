@@ -1,14 +1,14 @@
 package com.ecoembes.domain;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class RecyclingPlant {
 	private int id;
 	private String name;
 	private double capacity;
-	private List<Assigment> assigments = new ArrayList<>();
+	private List<Assigment> assigments = new CopyOnWriteArrayList<>();
 	
 
 	// CONSTRUCTOR
@@ -45,18 +45,20 @@ public class RecyclingPlant {
 	public void setCapacity(double capacity) {
 		this.capacity = capacity;
 	}
-	 public double getAssignedCapacity(LocalDateTime date) {
-	     double result = 0;
-	     for (Assigment a: assigments) {
-	    	 if (a.getDate().equals(date)) {
-	    		 result += a.getTotalContainers();
-	    	 }
-	     }
-	     return result;
-		 
-	 }
-	 public void addAssigment (Assigment a) {
-		 this.assigments.add(a);
-	 }
+
+	// Capacidad ya comprometida EN ESE DIA (se compara solo la fecha, no la hora)
+	public double getAssignedCapacity(LocalDateTime date) {
+		double result = 0;
+		for (Assigment a : assigments) {
+			if (a.getDate().toLocalDate().equals(date.toLocalDate())) {
+				result += a.getTotalContainers();
+			}
+		}
+		return result;
+	}
+
+	public void addAssigment(Assigment a) {
+		this.assigments.add(a);
+	}
 
 }

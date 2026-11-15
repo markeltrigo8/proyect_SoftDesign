@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,12 +15,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.ecoembes.domain.Assigment;
+import com.ecoembes.domain.Employee;
 import com.ecoembes.domain.RecyclingPlant;
 import com.ecoembes.dto.AssigmentDTO;
 import com.ecoembes.dto.AssigmentRequestDTO;
 import com.ecoembes.dto.RecyclingPlantDTO;
+import com.ecoembes.service.AuthService;
 import com.ecoembes.service.RecyclingPlantService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,9 +39,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class RecyclingPlantController {
 
     private final RecyclingPlantService plantService;
+	private AuthService authService;
 
-    public RecyclingPlantController(RecyclingPlantService plantService) {
+    public RecyclingPlantController(AuthService authService,RecyclingPlantService plantService) {
         this.plantService = plantService;
+	    this.authService = authService;
     }
 
     // 1: checkRecyclingPlantCapacity(token, date)
@@ -56,8 +62,8 @@ public class RecyclingPlantController {
             @Parameter(name = "date", description = "Date to check, ISO format (yyyy-MM-dd)", required = true, example = "2026-11-08")
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
-    	
-    	Map<RecyclingPlant, Double> capacities = plantService.getCapacities(token, date.atStartOfDay());
+    	authenticate(token);
+    	Map<RecyclingPlant, Double> capacities = plantService.getCapacities( date.atStartOfDay());
         // 1.1: getCapacities(date). El service recibe LocalDateTime, así que se convierte.
         List<RecyclingPlantDTO> result = new ArrayList<>();
         capacities.forEach((plant, capacity) -> result.add(createRecyclingPlantDTO(plant, date, capacity)));
@@ -91,8 +97,8 @@ public class RecyclingPlantController {
             @RequestBody AssigmentRequestDTO request) {
 
         try {
-            
-        	Assigment assigment = plantService.assignDumpsterToRecyclingPlant(token, request.getRecyclingPlantId(), request.getDumpsterIds());
+        	Employee employee = authenticate(token);
+        	Assigment assigment = plantService.assignDumpsterToRecyclingPlant(employee, request.getRecyclingPlantId(), request.getDumpsterIds());
         	
         	return ResponseEntity.ok(createAssigmentDTO(assigment, request));
          
@@ -112,4 +118,10 @@ public class RecyclingPlantController {
                 a.getEmployee().getEmail(), request.getDumpsterIds(),
                 a.getTotalContainers(), a.getTotalDumpsters());
     }
+    
+	private Employee authenticate(String token) {
+		
+		return authService.getEmployeeByToken(token).orElseThrow(()->new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid or missing token"));
+		
+	}
 }

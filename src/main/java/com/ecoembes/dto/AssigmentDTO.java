@@ -49,11 +49,11 @@ public class AssigmentDTO {
 	public void setEmployeeEmail(String employeeEmail) {
 		this.employeeEmail = employeeEmail;
 	}
-	public List<Integer> getContainersId() {
+	public List<Integer> getDumpstersId() {
 		return dumpstersId;
 	}
-	public void setContainersId(List<Integer> containersId) {
-		this.dumpstersId = containersId;
+	public void setDumpstersId(List<Integer> dumpstersId) {
+		this.dumpstersId = dumpstersId;
 	}
 	public int getTotalContainers() {
 		return totalContainers;

@@ -4,9 +4,9 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class DumpsterUsageDTO {
-	LocalDateTime date;
-	int numContainers;
-	String fillLevel;
+	private LocalDateTime date;
+	private int numContainers;
+	private String fillLevel;
 	
 	//CONSTRUCTOR
 	

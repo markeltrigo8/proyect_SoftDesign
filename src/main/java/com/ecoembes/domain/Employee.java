@@ -1,13 +1,13 @@
 package com.ecoembes.domain;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Employee {
 	private String name;
 	private String email;
 	private String password;
-	private List<Assigment> assigments = new ArrayList<>();
+	private List<Assigment> assigments = new CopyOnWriteArrayList<>();
 	
 	public Employee(String name, String email, String password) {
 		super();
@@ -43,6 +43,9 @@ public class Employee {
 	
 	public boolean checkPassword(String password) {
 		return this.password.equals(password);
+	}
+	public void addAssigment(Assigment a) {
+		this.assigments.add(a);
 	}
 	public List<Assigment> getEmployeeAsigments(){
 		return this.assigments;
