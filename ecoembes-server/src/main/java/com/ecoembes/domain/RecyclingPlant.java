@@ -1,27 +1,34 @@
 package com.ecoembes.domain;
 
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class RecyclingPlant {
+
+	@Id
 	private int id;
+
 	private String name;
 	private double capacity;
-	private List<Assigment> assigments = new CopyOnWriteArrayList<>();
-	
 
-	// CONSTRUCTOR
+	@OneToMany(mappedBy = "recyclingPlant")
+	private List<Assigment> assigments = new ArrayList<>();
+
+	// Constructor requerido por JPA
+	protected RecyclingPlant() {
+	}
 
 	public RecyclingPlant(int id, String name, double capacity) {
-		super();
 		this.id = id;
 		this.name = name;
 		this.capacity = capacity;
 	}
 
-	// GETTERS & SETTERS
-	
 	public int getId() {
 		return id;
 	}
@@ -46,19 +53,14 @@ public class RecyclingPlant {
 		this.capacity = capacity;
 	}
 
-	// Capacidad ya comprometida EN ESE DIA (se compara solo la fecha, no la hora)
-	public double getAssignedCapacity(LocalDateTime date) {
-		double result = 0;
-		for (Assigment a : assigments) {
-			if (a.getDate().toLocalDate().equals(date.toLocalDate())) {
-				result += a.getTotalContainers();
-			}
-		}
-		return result;
-	}
-
 	public void addAssigment(Assigment a) {
 		this.assigments.add(a);
 	}
 
+	public List<Assigment> getAssigments() {
+		return assigments;
+	}
+
+	// La capacidad asignada por día se calcula ahora con
+	// AssigmentRepository.sumContainersByPlantAndDay(...)
 }

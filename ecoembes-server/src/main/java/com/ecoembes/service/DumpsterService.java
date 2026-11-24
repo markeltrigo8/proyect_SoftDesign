@@ -2,18 +2,21 @@ package com.ecoembes.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import com.ecoembes.dao.DumpsterRepository;
+import com.ecoembes.dao.UsageRecordRepository;
 import com.ecoembes.domain.Dumpster;
 import com.ecoembes.domain.FillLevel;
 import com.ecoembes.domain.UsageRecord;
@@ -21,25 +24,32 @@ import com.ecoembes.domain.UsageRecord;
 @Service
 public class DumpsterService {
 
-	private Map<Integer, Dumpster> dumpsterRepository = new ConcurrentHashMap<>();
-	
-	
-	
+	private final DumpsterRepository dumpsterRepository;
+	private final UsageRecordRepository usageRecordRepository;
+
+	public DumpsterService(DumpsterRepository dumpsterRepository, UsageRecordRepository usageRecordRepository) {
+		this.dumpsterRepository = dumpsterRepository;
+		this.usageRecordRepository = usageRecordRepository;
+	}
+
+	// Guarda también los UsageRecord que ya tenga añadidos (cascade ALL)
+	@Transactional
 	public void addDumpster(Dumpster dumpster) {
-		dumpsterRepository.put(dumpster.getId(), dumpster);
+		dumpsterRepository.save(dumpster);
 	}
 
+	@Transactional(readOnly = true)
 	public Optional<Dumpster> getDumpster(int id) {
-		return Optional.ofNullable(dumpsterRepository.get(id));
+		return dumpsterRepository.findById(id);
 	}
 
+	@Transactional(readOnly = true)
 	public List<Dumpster> getAllDumpsters() {
-		List<Dumpster> result = new ArrayList<>(dumpsterRepository.values());
-		result.sort(Comparator.comparingInt(Dumpster::getId));
-		return result;
+		return dumpsterRepository.findAll(Sort.by("id"));
 	}
 
-	// Suma los contenedores de los dumpsters indicados. Si alguno no existe -> 404 (antes: NullPointerException -> 500)
+	// Suma los contenedores de los dumpsters indicados. Si alguno no existe -> 404
+	@Transactional(readOnly = true)
 	public int calculateTotalCont(List<Integer> dumpstersID) {
 		int result = 0;
 		for (int id : dumpstersID) {
@@ -47,32 +57,33 @@ public class DumpsterService {
 		}
 		return result;
 	}
-	
-	
+
+	@Transactional
 	public void createDumpster(String token, int id, String location, int postalCode, int capacity, int numContainers) {
-		
-		if(location == null || location.isBlank() || capacity <=0) {
+
+		if (location == null || location.isBlank() || capacity <= 0) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Location and a capacity bigger than 0 is required");
-			
 		}
-		
+
 		if (numContainers < 0 || numContainers > capacity) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "numContainers must be between 0 and the capacity (" + capacity + ")");
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"numContainers must be between 0 and the capacity (" + capacity + ")");
 		}
-		
-		// Antes se ignoraba numContainers y siempre se creaba con 0 y GREEN. El nivel se calcula igual que en DataInitializer.
-		FillLevel fillLevel = calculateFillLevel(numContainers, capacity);
-		Dumpster dumpster = new Dumpster(id, location, postalCode, capacity, numContainers, fillLevel);
-		
-		//IAG funcion hecha con ayudada de la IA
-		if(dumpsterRepository.putIfAbsent(dumpster.getId(), dumpster) != null) {
+
+		// Con id asignado a mano, save() haría "merge" y sobrescribiría uno existente,
+		// por eso hay que comprobar antes que no exista.
+		if (dumpsterRepository.existsById(id)) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, "The dumpster already exists");
 		}
-		
-		// Registro inicial: sin el, el dumpster no aparece en checkDumpsterStatus hasta que llegue una actualizacion
-		dumpster.addUsageRecord(new UsageRecord(LocalDateTime.now(), numContainers, fillLevel, dumpster));
+
+		FillLevel fillLevel = calculateFillLevel(numContainers, capacity);
+		Dumpster dumpster = dumpsterRepository.save(
+				new Dumpster(id, location, postalCode, capacity, numContainers, fillLevel));
+
+		// Registro inicial: sin él, el dumpster no aparece en checkDumpsterStatus hasta que llegue una actualización
+		usageRecordRepository.save(new UsageRecord(LocalDateTime.now(), numContainers, fillLevel, dumpster));
 	}
-	
+
 	private static FillLevel calculateFillLevel(int numContainers, int capacity) {
 		double ratio = (double) numContainers / capacity;
 		if (ratio < 0.5) {
@@ -82,45 +93,49 @@ public class DumpsterService {
 		}
 		return FillLevel.RED;
 	}
-	
-	public List<UsageRecord> queryDumpster(String token, int dumpsterID, LocalDate startDate, LocalDate endDate){
-		
-		Dumpster dumpster = findDumpster(dumpsterID);
-		if(startDate == null || endDate == null || startDate.isAfter(endDate)) {
+
+	@Transactional(readOnly = true)
+	public List<UsageRecord> queryDumpster(String token, int dumpsterID, LocalDate startDate, LocalDate endDate) {
+
+		findDumpster(dumpsterID); // 404 si no existe
+		if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "It is required a valid start and end date");
-			
 		}
-		
-		List<UsageRecord> result = new ArrayList<>();
-		for (UsageRecord r : dumpster.getUsageHistory()) {
-			LocalDate d = r.getDate().toLocalDate();
-			if(!d.isBefore(startDate)&&!d.isAfter(endDate)) {
-				result.add(r);
-			}
+
+		// La BD filtra por rango de fechas (inicio del primer día hasta el final del último)
+		return usageRecordRepository.findByDumpsterIdAndDateBetweenOrderByDateAscIdAsc(
+				dumpsterID, startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX));
+	}
+
+	// Devuelve cada dumpster del código postal junto con su registro de ESE día.
+	@Transactional(readOnly = true)
+	public Map<Dumpster, UsageRecord> checkDumpsterStatus(int postalCode, LocalDate date) {
+
+		if (date == null) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A date is required");
+		}
+
+		LocalDateTime start = date.atStartOfDay();
+		LocalDateTime end = date.atTime(LocalTime.MAX);
+
+		Map<Dumpster, UsageRecord> result = new LinkedHashMap<>();
+		List<Dumpster> dumpsters = dumpsterRepository.findByPostalCode(postalCode);
+		dumpsters.sort(Comparator.comparingInt(Dumpster::getId));
+
+		for (Dumpster d : dumpsters) {
+			usageRecordRepository.findFirstByDumpsterIdAndDateBetweenOrderByDateDescIdDesc(d.getId(), start, end)
+					.ifPresent(r -> result.put(d, r));
 		}
 		return result;
 	}
 
-	// Devuelve cada dumpster del codigo postal junto con su registro de ESE dia.
-	// (Antes se devolvia solo el dumpster y el controlador mostraba su estado ACTUAL, no el del dia consultado.)
-	public Map<Dumpster, UsageRecord> checkDumpsterStatus(int postalCode, LocalDate date){
-	
-		if (date == null) {
-			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A date is required");
-		}
-		
-		Map<Dumpster, UsageRecord> result = new LinkedHashMap<>();
-		for(Dumpster d: getAllDumpsters()) {
-			if (d.getPostalCode() == postalCode) {
-				findRecordByDay(d, date).ifPresent(r -> result.put(d, r));
-			}
-		}
-		return result;
-	}
-	
+	// El bloqueo de la fila del dumpster sustituye al synchronized
+	@Transactional
 	public UsageRecord transmitUpdates(int dumpsterId, int numContainers, FillLevel fillLevel) {
-		Dumpster dumpster = findDumpster(dumpsterId);
-		
+		Dumpster dumpster = dumpsterRepository.findByIdForUpdate(dumpsterId)
+				.orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
+						"Dumpster not found: " + dumpsterId));
+
 		if (fillLevel == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A fill level is required");
 		}
@@ -128,35 +143,21 @@ public class DumpsterService {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
 					"numContainers must be between 0 and the dumpster capacity (" + dumpster.getCapacity() + ")");
 		}
-		
-		// Antes: la fecha se forzaba a las 03:00 de hoy (podia quedar en el futuro) y el dumpster no se actualizaba.
-		UsageRecord record = new UsageRecord(LocalDateTime.now(), numContainers, fillLevel, dumpster);
-		
-		synchronized (dumpster) {
-			dumpster.addUsageRecord(record);
-			// El estado actual del dumpster tiene que reflejar la ultima actualizacion recibida
-			dumpster.setNumContainers(numContainers);
-			dumpster.setFillLevel(fillLevel);
-		}
+
+		UsageRecord record = usageRecordRepository.save(
+				new UsageRecord(LocalDateTime.now(), numContainers, fillLevel, dumpster));
+
+		// El estado actual refleja la última actualización (se guarda solo al terminar la transacción)
+		dumpster.setNumContainers(numContainers);
+		dumpster.setFillLevel(fillLevel);
 
 		return record;
 	}
 
+	@Transactional(readOnly = true)
 	public Dumpster findDumpster(int dumpsterID) {
-		return getDumpster(dumpsterID).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND, 	"Dumpster not found: "+ dumpsterID));
+		return getDumpster(dumpsterID).orElseThrow(
+				() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dumpster not found: " + dumpsterID));
 	}
-	
-	
-	// Ultimo registro del dia indicado (el historial esta en orden de insercion)
-	private Optional<UsageRecord> findRecordByDay(Dumpster d, LocalDate day) {
-		UsageRecord found = null;
-		for(UsageRecord r : d.getUsageHistory()) {
-			if(r.getDate().toLocalDate().equals(day)) {
-				found = r;
-			}
-		}
-		return Optional.ofNullable(found);
-	}
-
 
 }

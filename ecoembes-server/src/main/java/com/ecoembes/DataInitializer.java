@@ -32,6 +32,13 @@ public class DataInitializer {
 			RecyclingPlantService recyclingPlantService) {
 		return args -> {
 
+			// La base de datos ya está inicializada (evita duplicar datos en cada arranque
+			// si la BD es persistente)
+			if (!dumpsterService.getAllDumpsters().isEmpty()) {
+				logger.info("Database already initialized, skipping test data.");
+				return;
+			}
+
 			// ---------- Empleados ----------
 			Employee ane = new Employee("Ane Etxebarria", "ane.etxebarria@ecoembes.com", "An3Etx#2026");
 			Employee jon = new Employee("Jon Aguirre", "jon.aguirre@ecoembes.com", "J0nAgu!rre26");
@@ -68,27 +75,26 @@ public class DataInitializer {
 
 			Dumpster[] dumpsters = { d1, d2, d3, d4, d5, d6, d7, d8, d9, d10 };
 
-			for (Dumpster d : dumpsters) {
-				dumpsterService.addDumpster(d);
-			}
-
-			logger.info("Dumpsters saved!");
-
 			// ---------- Historial de uso ----------
+			// IMPORTANTE: el historial se añade ANTES de guardar. Los UsageRecord se
+			// guardan junto con el Dumpster (CascadeType.ALL); si se añadieran
+			// después de addDumpster, no llegarían a la base de datos.
 			for (Dumpster d : dumpsters) {
 				addUsageHistory(d, USAGE_HISTORY_DAYS);
 			}
 
-			logger.info("Usage records saved!");
+			for (Dumpster d : dumpsters) {
+				dumpsterService.addDumpster(d);
+			}
+
+			logger.info("Dumpsters and usage records saved!");
 		};
 	}
 
-	
 	private static Dumpster createDumpster(int id, String location, int postalCode, int capacity, int numContainers) {
 		return new Dumpster(id, location, postalCode, capacity, numContainers,
 				calculateFillLevel(numContainers, capacity));
 	}
-
 
 	private static FillLevel calculateFillLevel(int numContainers, int capacity) {
 		double ratio = (double) numContainers / capacity;
@@ -100,7 +106,6 @@ public class DataInitializer {
 			return FillLevel.RED;
 		}
 	}
-
 
 	private static void addUsageHistory(Dumpster dumpster, int days) {
 		LocalDateTime now = LocalDateTime.now();

@@ -6,40 +6,50 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.ecoembes.dao.EmployeeRepository;
 import com.ecoembes.domain.Employee;
 
 @Service
 public class AuthService {
-	private Map<String, Employee> employeeRepository = new ConcurrentHashMap<>();
-	private Map<String, Employee> tokenRepository = new ConcurrentHashMap<>();
-	
+
+	private final EmployeeRepository employeeRepository;
+
+	// token -> email del empleado. Se guarda el email (no el objeto) para que el
+	// Employee se cargue siempre desde la BD y no quede "suelto" entre peticiones.
+	private final Map<String, String> tokenRepository = new ConcurrentHashMap<>();
+
+	public AuthService(EmployeeRepository employeeRepository) {
+		this.employeeRepository = employeeRepository;
+	}
+
+	@Transactional
 	public void addEmployee(Employee employee) {
-		employeeRepository.put(employee.getEmail(), employee);
+		employeeRepository.save(employee);
 	}
-	
-	public Optional<String> login(String email, String password ) {
-		if (email ==null || password == null) {
+
+	@Transactional(readOnly = true)
+	public Optional<String> login(String email, String password) {
+		if (email == null || password == null) {
 			return Optional.empty();
 		}
-		
-		Employee employee = employeeRepository.get(email);
-		
-		if (employee != null && employee.checkPassword(password)) {
+
+		Optional<Employee> employee = employeeRepository.findById(email);
+
+		if (employee.isPresent() && employee.get().checkPassword(password)) {
 			String token = generateToken();
-			tokenRepository.put(token, employee);
-			
+			tokenRepository.put(token, email);
 			return Optional.of(token);
-		}else {
-			return Optional.empty();
 		}
+		return Optional.empty();
 	}
-	
+
 	public Optional<Boolean> logout(String token) {
 		if (token == null || !tokenRepository.containsKey(token)) {
 			return Optional.empty();
 		}
-		
+
 		tokenRepository.remove(token);
 		return Optional.of(true);
 	}
@@ -48,12 +58,16 @@ public class AuthService {
 		return UUID.randomUUID().toString();
 	}
 
-
+	@Transactional(readOnly = true)
 	public Optional<Employee> getEmployeeByToken(String token) {
 		if (token == null) {
 			return Optional.empty();
 		}
-		return Optional.ofNullable(tokenRepository.get(token));
+		String email = tokenRepository.get(token);
+		if (email == null) {
+			return Optional.empty();
+		}
+		return employeeRepository.findById(email);
 	}
-	
+
 }

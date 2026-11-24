@@ -2,24 +2,47 @@ package com.ecoembes.domain;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+@Entity
 public class UsageRecord {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
 	private LocalDateTime date;
 	private int numContainers;
+
+	@Enumerated(EnumType.STRING)
 	private FillLevel fillLevel;
+
+	@ManyToOne(optional = false)
+	@JoinColumn(name = "dumpster_id")
 	private Dumpster dumpster;
-	
-	//CONSTRUCTOR
-	
+
+	// Constructor requerido por JPA
+	protected UsageRecord() {
+	}
+
 	public UsageRecord(LocalDateTime date, int numContainers, FillLevel fillLevel, Dumpster dumpster) {
-		super();
 		this.date = date;
 		this.numContainers = numContainers;
 		this.fillLevel = fillLevel;
 		this.dumpster = dumpster;
 	}
-	
-	//GETTERS & SETTERS
-	
+
+	public Long getId() {
+		return id;
+	}
+
 	public LocalDateTime getDate() {
 		return date;
 	}
@@ -51,5 +74,4 @@ public class UsageRecord {
 	public void setDumpster(Dumpster dumpster) {
 		this.dumpster = dumpster;
 	}
-	
 }

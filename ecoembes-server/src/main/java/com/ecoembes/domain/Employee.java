@@ -1,20 +1,32 @@
 package com.ecoembes.domain;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+@Entity
 public class Employee {
-	private String name;
+
+	@Id
 	private String email;
+
+	private String name;
 	private String password;
-	private List<Assigment> assigments = new CopyOnWriteArrayList<>();
-	
+
+	@OneToMany(mappedBy = "employee")
+	private List<Assigment> assigments = new ArrayList<>();
+
+	// Constructor requerido por JPA
+	protected Employee() {
+	}
+
 	public Employee(String name, String email, String password) {
-		super();
 		this.name = name;
 		this.email = email;
 		this.password = password;
-		
 	}
 
 	public String getName() {
@@ -40,17 +52,20 @@ public class Employee {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+
 	public boolean checkPassword(String password) {
 		return this.password.equals(password);
 	}
+
 	public void addAssigment(Assigment a) {
 		this.assigments.add(a);
 	}
-	public List<Assigment> getEmployeeAsigments(){
+
+	public List<Assigment> getEmployeeAsigments() {
 		return this.assigments;
 	}
-	public void setAssigments (List<Assigment> a) {
+
+	public void setAssigments(List<Assigment> a) {
 		this.assigments = a;
 	}
 }
