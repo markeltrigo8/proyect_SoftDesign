@@ -1,6 +1,7 @@
 package com.ecoembes.gateaway;
 
 import java.time.LocalDate;
+import com.ecoembes.gateaway.PlantCommunicationException;
 import java.util.List;
 import java.util.Optional;
 

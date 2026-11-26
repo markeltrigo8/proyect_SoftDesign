@@ -1,12 +1,14 @@
 package com.ecoembes.service;
 
 import java.time.LocalDateTime;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,9 +22,14 @@ import com.ecoembes.domain.Dumpster;
 import com.ecoembes.domain.Employee;
 import com.ecoembes.domain.RecyclingPlant;
 
+import com.ecoembes.gateaway.IRecyclingPlantGateaway;
+import com.ecoembes.gateaway.PlantCommunicationException;
+
 @Service
 public class RecyclingPlantService {
-
+	
+	private static final Logger logger = LoggerFactory.getILogger(RecyclingPlantService.class); // IA
+	
 	private final RecyclingPlantRepository recyclingPlantRepository;
 	private final AssigmentRepository assigmentRepository;
 	private final DumpsterService dumpsterService;
@@ -48,18 +55,18 @@ public class RecyclingPlantService {
 	public Map<RecyclingPlant, Double> getCapacities(LocalDateTime date) {
 		Map<RecyclingPlant, Double> result = new LinkedHashMap<>();
 		for (RecyclingPlant r : getAllRecyclingPlants()) {
-			result.put(r, getAvailableCapacity(date, r));
+			getAvailableCapacity(date, r).ifPresentOrElse(
+					capacity -> result.put(r, (double) capacity),
+					()-> logger.warn("Capacity of plant {} is not available", r.getId()));
 		}
 		return result;
 	}
 
 	// Capacidad total de la planta menos lo ya asignado ESE día (consulta en BD)
 	@Transactional(readOnly = true)
-	public double getAvailableCapacity(LocalDateTime date, RecyclingPlant plant) {
-		LocalDateTime start = date.toLocalDate().atStartOfDay();
-		LocalDateTime end = start.plusDays(1);
-		int assigned = assigmentRepository.sumContainersByPlantAndDay(plant.getId(), start, end);
-		return plant.getTotalCapacity() - assigned;
+	public Optional<Integer> getAvailableCapacity(LocalDateTime date, RecyclingPlant plant) {
+		IRecyclingPlantGateway gateway=  RecyclingPlantGatewayFactory.createGateway(plant);
+		return gateway.getAvailableCapacity(date.toLocalDate());
 	}
 
 	// La transacción + el bloqueo de la fila de la planta hacen atómico el
@@ -92,14 +99,25 @@ public class RecyclingPlantService {
 		}
 
 		LocalDateTime now = LocalDateTime.now();
+		
+		//Realizado con ayuda de IA
+		IRecyclingPlantGateway gateway = RecyclingPlantGatewayFactory.createGateway(plant);
+		int available = gateway.getAvailableCapacity(now.toLocalDate())
+				.orElseThrow(()-> new PlantCommunicationException(
+						"Could not get the capacity of plant "+ plantId));
 
-		if (!isAvailable(getAvailableCapacity(now, plant), totalCont)) {
+		if (!isAvailable(available, totalCont)) {
 			throw new IllegalStateException("The plant does not have enough capacity");
 		}
-
+		
+		Assigment assigment = assigmentRepository.save(
+				new Assigment(now, totalDump, totalCont, employee, plant, dumpsters));
+		
+		List<String> ids= dumpsterIds.stream().map(String::valueOf).toList();
+		gateway.notifyPlant(now.toLocalDate(), totalDump, totalCont, ids);
 		// Basta con guardar la Assigment: es el lado que tiene las claves foráneas
 		// (employee, planta y tabla intermedia con los dumpsters).
-		return assigmentRepository.save(new Assigment(now, totalDump, totalCont, employee, plant, dumpsters));
+		return assigment;
 	}
 
 	@Transactional(readOnly = true)

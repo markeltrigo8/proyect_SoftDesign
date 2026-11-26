@@ -87,6 +87,7 @@ public class RecyclingPlantController {
                 content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
                                    schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid token")
+            @ApiResponse(responseCode = "502", description = "Bad Gateway: The recycling plant server did not respond")
         }
     )
     @PostMapping("/assignments")
