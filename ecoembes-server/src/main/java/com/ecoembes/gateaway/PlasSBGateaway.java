@@ -106,7 +106,7 @@ public class PlasSBGateaway implements IRecyclingPlantGateaway {
 	}
 
 	@Override
-	public void notifyPlant(LocalDate date, int numDumpsters, int numContainers, List<String> listDumpstersID) {
+	public void notifyPlant(LocalDate date, int numDumpsters, int numContainers, List<Integer> listDumpstersID) {
 		try {
 			String json = objectMapper.writeValueAsString(Map.of(
 					"date", date.toString(),

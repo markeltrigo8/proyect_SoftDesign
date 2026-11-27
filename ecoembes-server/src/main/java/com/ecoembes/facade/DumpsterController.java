@@ -113,7 +113,7 @@ public class DumpsterController {
 		authenticate(token);
 		// Si no llega fecha, el servicio responde 400 (antes: NullPointerException -> 500)
 		LocalDate day = dsdto.getDate() == null ? null : dsdto.getDate().toLocalDate();
-		Map<Dumpster, UsageRecord> found = dumpsterService.checkDumpsterStatus(dsdto.getPostalCode(), day);
+		Map<Dumpster, UsageRecord> found = dumpsterService.checkDumpsterStatus(dsdto.getPostalCode(), dsdto.getDate());
 		// El DTO se construye con el registro DE ESE DIA, no con el estado actual del dumpster
 		List<DumpsterDTO> dumpsters = new ArrayList<>();
 		found.forEach((d, r) -> dumpsters.add(createDumpsterDTO(d, r)));

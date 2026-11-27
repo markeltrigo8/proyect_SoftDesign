@@ -48,7 +48,8 @@ public class ClientHandler implements Runnable {
 				return "OK;" + plantService.getAvailableCapacity(parseDate(p, 1));
 			case "NOTIFY":
 				if (p.length != 5) throw new RequestException(400, "NOTIFY needs 4 fields");
-				List<String> ids = p[4].isBlank() ? List.of() : Arrays.asList(p[4].split(","));
+				List<Integer> ids = p[4].isBlank() ? List.of()
+						: Arrays.stream(p[4].split(",")).map(Integer::parseInt).toList();
 				Assignment a = plantService.registerAssignment(parseDate(p, 1),
 						Integer.parseInt(p[2]), Integer.parseInt(p[3]), ids);
 				return "OK;" + a.getId();

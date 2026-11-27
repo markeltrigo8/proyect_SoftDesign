@@ -63,7 +63,7 @@ public class RecyclingPlantController {
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
 
     	authenticate(token);
-    	Map<RecyclingPlant, Double> capacities = plantService.getCapacities( date.atStartOfDay());
+    	Map<RecyclingPlant, Integer> capacities = plantService.getCapacities(date);
         // 1.1: getCapacities(date). El service recibe LocalDateTime, así que se convierte.
         List<RecyclingPlantDTO> result = new ArrayList<>();
         capacities.forEach((plant, capacity) -> result.add(createRecyclingPlantDTO(plant, date, capacity)));
@@ -87,6 +87,7 @@ public class RecyclingPlantController {
                 content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
                                    schema = @Schema(implementation = String.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid token"),
+            @ApiResponse(responseCode = "409",description = "Conflict: The plant does not have enough capacity"),
             @ApiResponse(responseCode = "502", description = "Bad Gateway: The recycling plant server did not respond")
         }
     )
@@ -104,18 +105,17 @@ public class RecyclingPlantController {
         	return ResponseEntity.ok(createAssigmentDTO(assigment, request));
          
         } catch (IllegalStateException e) {
-            // 2.2: 400 errorMessage (la planta no tiene capacidad suficiente)
-            return ResponseEntity.badRequest().body(e.getMessage());
+        	return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
     }
     
     // Crear DTO
-    private RecyclingPlantDTO createRecyclingPlantDTO(RecyclingPlant plant, LocalDate date, double capacity) {
+    private RecyclingPlantDTO createRecyclingPlantDTO(RecyclingPlant plant, LocalDate date, int capacity) {
         return new RecyclingPlantDTO(plant.getId(), plant.getName(), date, capacity);
     }
 
     private AssigmentDTO createAssigmentDTO(Assigment a, AssigmentRequestDTO request) {
-        return new AssigmentDTO(a.getDate().toLocalDate(), request.getRecyclingPlantId(),
+        return new AssigmentDTO(a.getDate(), request.getRecyclingPlantId(),
                 a.getEmployee().getEmail(), request.getDumpsterIds(),
                 a.getTotalContainers(), a.getTotalDumpsters());
     }

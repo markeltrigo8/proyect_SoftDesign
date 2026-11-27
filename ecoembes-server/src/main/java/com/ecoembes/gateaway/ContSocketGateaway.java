@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.stream.Collectors;
 
 import com.ecoembes.exception.PlantCommunicationException;
 
@@ -41,18 +42,30 @@ public class ContSocketGateaway implements IRecyclingPlantGateaway {
 	}
 
 	@Override
-	public void notifyPlant(LocalDate date, int numDumpsters, int numContainers, List<String> ids) {
-		try {
-			String req = "NOTIFY;" + date + ";" + numDumpsters + ";" + numContainers + ";" + String.join(",", ids);
-			String[] r = send(req).split(";", 3);
-			if (r[0].equals("OK")) return;
-			if (r.length >= 2 && r[1].equals("409")) {
-				throw new IllegalStateException("The plant does not have enough capacity");
-			}
-			throw new PlantCommunicationException("ContSocket rejected the notification: " + String.join(";", r));
-		} catch (IOException e) {
-			throw new PlantCommunicationException("Could not notify ContSocket", e);
-		}
+	public void notifyPlant(LocalDate date, int numDumpsters, int numContainers, List<Integer> ids) {
+	    String idList = ids.stream().map(String::valueOf).collect(Collectors.joining(","));
+	    String req = "NOTIFY;" + date + ";" + numDumpsters + ";" + numContainers + ";" + idList;
+
+	    try (Socket socket = new Socket(host, port);
+	         PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
+	         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))) {
+
+	        out.println(req);
+	        String line = in.readLine();
+	        if (line == null) {
+	            throw new PlantCommunicationException("ContSocket closed the connection without replying");
+	        }
+
+	        String[] r = line.split(";");
+	        if (r[0].equals("OK")) return;
+	        if (r.length >= 2 && r[1].equals("409")) {
+	            throw new IllegalStateException("The plant does not have enough capacity");
+	        }
+	        throw new PlantCommunicationException("ContSocket rejected the notification: " + String.join(";", r));
+
+	    } catch (IOException e) {
+	        throw new PlantCommunicationException("Could not notify ContSocket", e);
+	    }
 	}
 
 	private String send(String request) throws IOException {

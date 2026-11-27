@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface IRecyclingPlantGateaway {
 	public Optional<Integer> getAvailableCapacity(LocalDate date);
-	public void notifyPlant(LocalDate date, int numDumpsters, int numContainers, List<String> listDumpstersID);
+	public void notifyPlant(LocalDate date, int numDumpsters, int numContainers, List<Integer> listDumpstersID);
 }

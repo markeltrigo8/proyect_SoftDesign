@@ -49,9 +49,9 @@ public class DataInitializer {
 			// (Los ids de dumpster coinciden con los del DataInitializer de Ecoembes.)
 			LocalDate today = LocalDate.now();
 
-			assignmentRepository.save(new Assignment(today, 3, 12, List.of("1", "2", "3"), plant));
-			assignmentRepository.save(new Assignment(today.minusDays(1), 2, 20, List.of("7", "8"), plant));
-
+			assignmentRepository.save(new Assignment(today, 3, 12, List.of(1, 2, 3), plant));
+			assignmentRepository.save(new Assignment(today.minusDays(1), 2, 20, List.of(7, 8), plant));
+			
 			logger.info("Assignments saved!");
 		};
 	}

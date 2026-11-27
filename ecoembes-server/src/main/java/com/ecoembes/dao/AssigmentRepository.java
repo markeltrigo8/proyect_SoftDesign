@@ -1,5 +1,6 @@
 package com.ecoembes.dao;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -19,9 +20,7 @@ public interface AssigmentRepository extends JpaRepository<Assigment, Long> {
 			select coalesce(sum(a.totalContainers), 0)
 			from Assigment a
 			where a.recyclingPlant.id = :plantId
-			  and a.date >= :start and a.date < :end
+			  and a.date = :date
 			""")
-	int sumContainersByPlantAndDay(@Param("plantId") int plantId,
-			@Param("start") LocalDateTime start,
-			@Param("end") LocalDateTime end);
+	int sumContainersByPlantAndDay(@Param("plantId") int plantId, @Param("date") LocalDate date);
 }
