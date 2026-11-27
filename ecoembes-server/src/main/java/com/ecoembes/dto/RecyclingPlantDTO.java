@@ -7,14 +7,14 @@ public class RecyclingPlantDTO {
 	private int id;
 	private String name;
 	private LocalDate date;
-	private double capacity;
+	private int capacity;
 	
 	//CONSTRUCTOR
 	
 	public RecyclingPlantDTO() {
 	}
 	
-	public RecyclingPlantDTO(int id, String name, LocalDate date, double capacity) {
+	public RecyclingPlantDTO(int id, String name, LocalDate date, int capacity) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -45,10 +45,10 @@ public class RecyclingPlantDTO {
 	public void setDate(LocalDate date) {
 		this.date = date;
 	}
-	public double getCapacity() {
+	public int getCapacity() {
 		return capacity;
 	}
-	public void setCapacity(double capacity) {
+	public void setCapacity(int capacity) {
 		this.capacity = capacity;
 	}
 	@Override

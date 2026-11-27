@@ -75,39 +75,30 @@ public class RecyclingPlantController {
 
     // 2: assignDumpsterToRecyclingPlant(token, request)
     @Operation(
-        summary = "Assign a dumpster to a recycling plant",
-        description = "Assigns a dumpster to a recycling plant if the plant has enough capacity.",
-        responses = {
-            @ApiResponse(responseCode = "200",
-                description = "OK: Assignment created, returns the assignment",
-                content = @Content(mediaType = MediaType.APPLICATION_JSON_VALUE,
-                                   schema = @Schema(implementation = AssigmentDTO.class))),
-            @ApiResponse(responseCode = "400",
-                description = "Bad Request: The plant does not have enough capacity",
-                content = @Content(mediaType = MediaType.TEXT_PLAIN_VALUE,
-                                   schema = @Schema(implementation = String.class))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid token"),
-            @ApiResponse(responseCode = "409",description = "Conflict: The plant does not have enough capacity"),
-            @ApiResponse(responseCode = "502", description = "Bad Gateway: The recycling plant server did not respond")
-        }
-    )
-    @PostMapping("/assignments")
-    public ResponseEntity<?> assignDumpsterToRecyclingPlant(
-            @Parameter(name = "token", description = "Authorization token obtained at login", required = true)
-            @RequestParam("token") String token,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Assignment request data", required = true)
-            @RequestBody AssigmentRequestDTO request) {
+    		summary = "Assign dumpsters to a recycling plant",
+    		description = "Assigns dumpsters to a recycling plant if it has enough capacity (in containers) and notifies the plant.",
+    		responses = {
+    			@ApiResponse(responseCode = "200", description = "OK: Assignment created, returns the assignment"),
+    			@ApiResponse(responseCode = "400", description = "Bad Request: No dumpsters, duplicated dumpsters or no containers to assign"),
+    			@ApiResponse(responseCode = "401", description = "Unauthorized: Invalid token"),
+    			@ApiResponse(responseCode = "404", description = "Not Found: Plant or dumpster not found"),
+    			@ApiResponse(responseCode = "409", description = "Conflict: The plant does not have enough capacity"),
+    			@ApiResponse(responseCode = "502", description = "Bad Gateway: The recycling plant server did not respond")
+    		}
+    	)
+    	@PostMapping("/assignments")
+    	public ResponseEntity<AssigmentDTO> assignDumpsterToRecyclingPlant(
+    			@Parameter(name = "token", description = "Authorization token obtained at login", required = true)
+    			@RequestParam("token") String token,
+    			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Assignment request data", required = true)
+    			@RequestBody AssigmentRequestDTO request) {
 
-        try {
-        	Employee employee = authenticate(token);
-        	Assigment assigment = plantService.assignDumpsterToRecyclingPlant(employee, request.getRecyclingPlantId(), request.getDumpsterIds());
-        	
-        	return ResponseEntity.ok(createAssigmentDTO(assigment, request));
-         
-        } catch (IllegalStateException e) {
-        	return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
-    }
+    		Employee employee = authenticate(token);
+    		Assigment assigment = plantService.assignDumpsterToRecyclingPlant(employee,
+    				request.getRecyclingPlantId(), request.getDumpsterIds());
+
+    		return ResponseEntity.ok(createAssigmentDTO(assigment, request));
+    	}
     
     // Crear DTO
     private RecyclingPlantDTO createRecyclingPlantDTO(RecyclingPlant plant, LocalDate date, int capacity) {

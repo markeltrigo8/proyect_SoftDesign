@@ -1,6 +1,6 @@
 package com.ecoembes.domain;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +20,7 @@ public class Assigment {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private LocalDateTime date;
+	private LocalDate date;
 	private int totalDumpsters;
 	private int totalContainers;
 
@@ -43,7 +43,7 @@ public class Assigment {
 	protected Assigment() {
 	}
 
-	public Assigment(LocalDateTime date, int totalDumpsters, int totalContainers, Employee employee,
+	public Assigment(LocalDate date, int totalDumpsters, int totalContainers, Employee employee,
 			RecyclingPlant rp, List<Dumpster> dumpsters) {
 		this.date = date;
 		this.totalDumpsters = totalDumpsters;
@@ -57,11 +57,11 @@ public class Assigment {
 		return id;
 	}
 
-	public LocalDateTime getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 
-	public void setDate(LocalDateTime date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 

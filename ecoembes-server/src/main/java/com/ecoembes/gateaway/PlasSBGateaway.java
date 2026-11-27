@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.ecoembes.exception.PlantCommunicationException;
+import com.ecoembes.exception.InsufficientCapacityException;
 
 import tools.jackson.databind.ObjectMapper; // Spring Boot 3: com.fasterxml.jackson.databind.ObjectMapper
 
@@ -129,7 +130,7 @@ public class PlasSBGateaway implements IRecyclingPlantGateaway {
 				return;
 			}
 			if (status == 409) {
-				throw new IllegalStateException("The plant does not have enough capacity");
+				throw new InsufficientCapacityException("The plant does not have enough capacity");
 			}
 			throw new PlantCommunicationException("PlasSB rejected the notification (HTTP " + status + ")");
 

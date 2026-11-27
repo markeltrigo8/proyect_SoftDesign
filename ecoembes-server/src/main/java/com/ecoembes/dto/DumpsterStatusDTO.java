@@ -1,17 +1,17 @@
 package com.ecoembes.dto;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public class DumpsterStatusDTO {
 	private int postalCode;
-	private LocalDateTime date;
+	private LocalDate date;
 	
 	//CONSTRUCTOR
 	
 	public DumpsterStatusDTO() {
 	}
 	
-	public DumpsterStatusDTO(int postalCode, LocalDateTime date) {
+	public DumpsterStatusDTO(int postalCode, LocalDate date) {
 		super();
 		this.postalCode = postalCode;
 		this.date = date;
@@ -27,11 +27,11 @@ public class DumpsterStatusDTO {
 		this.postalCode = postalCode;
 	}
 
-	public LocalDateTime getDate() {
+	public LocalDate getDate() {
 		return date;
 	}
 
-	public void setDate(LocalDateTime date) {
+	public void setDate(LocalDate date) {
 		this.date = date;
 	}
 	

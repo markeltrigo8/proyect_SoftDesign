@@ -1,7 +1,8 @@
 package com.ecoembes.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import com.ecoembes.exception.InsufficientCapacityException;
+
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -117,7 +118,7 @@ public class RecyclingPlantService {
 						"Could not get the capacity of plant " + plantId));
 
 		if (!isAvailable(available, totalCont)) {
-			throw new IllegalStateException("The plant does not have enough capacity");
+			throw new InsufficientCapacityException("The plant does not have enough capacity");
 		}
 
 		Assigment assigment = assigmentRepository.save(
@@ -134,7 +135,5 @@ public class RecyclingPlantService {
 						"Recycling plant not found: " + id));
 	}
 
-	public boolean isAvailable(double availableCap, int totalCont) {
-		return availableCap >= totalCont;
-	}
+	
 }

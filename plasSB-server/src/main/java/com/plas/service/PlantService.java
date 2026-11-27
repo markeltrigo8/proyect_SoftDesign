@@ -48,7 +48,7 @@ public class PlantService {
 	// "comprobar capacidad y registrar asignación".
 	@Transactional
 	public Assignment registerAssignment(LocalDate date, int numDumpsters, int numContainers,
-			List<Integer> dumpsterIds) {
+			List<String> dumpsterIds) {
 
 		if (date == null) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A date is required");
