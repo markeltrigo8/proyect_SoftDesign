@@ -43,7 +43,8 @@ public class Assignment {
 	protected Assignment() {
 	}
 
-	public Assignment(LocalDate date, int numDumpsters, int numContainers, List<String> dumpsterIds, RecyclingPlant plant) {
+	public Assignment(LocalDate date, int numDumpsters, int numContainers, List<String> dumpsterIds,
+			RecyclingPlant plant) {
 		this.date = date;
 		this.numDumpsters = numDumpsters;
 		this.numContainers = numContainers;

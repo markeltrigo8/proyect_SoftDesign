@@ -128,7 +128,7 @@ public class PlasSBGateaway implements IRecyclingPlantGateaway {
 				return;
 			}
 			if(status == 409) {
-				throw new IllegalStateException("The plant does not have enough capacity")
+				throw new IllegalStateException("The plant does not have enough capacity");
 			}
 			throw new PlantCommunicationException("PlasSB rejected the notification (HTTP "+ status+")");
 			
@@ -138,7 +138,7 @@ public class PlasSBGateaway implements IRecyclingPlantGateaway {
 			throw new PlantCommunicationException("Interrupted while notifying PlasSB ",ex);
 		} catch (IOException ex) {
 			// El método es void: un fallo de red no debe romper la asignación ya registrada
-			throw new PlantCommunicationException("Could not notify PlasSB: {}", ex.getMessage());
+			throw new PlantCommunicationException("Could not notify PlasSB: {}", ex);
 		}
 	}
 }

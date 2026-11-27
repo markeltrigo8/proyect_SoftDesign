@@ -17,5 +17,5 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
 			where a.plant.id = :plantId
 			  and a.date = :date
 			""")
-
+	int sumContainersByPlantAndDate(@Param("plantId") int plantId, @Param("date") LocalDate date);
 }

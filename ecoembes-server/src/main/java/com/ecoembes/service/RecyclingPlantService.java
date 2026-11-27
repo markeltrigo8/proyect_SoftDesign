@@ -7,7 +7,9 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -21,14 +23,15 @@ import com.ecoembes.domain.Assigment;
 import com.ecoembes.domain.Dumpster;
 import com.ecoembes.domain.Employee;
 import com.ecoembes.domain.RecyclingPlant;
-
+import com.ecoembes.factory.RecyclingPlantGateawayFactory;
 import com.ecoembes.gateaway.IRecyclingPlantGateaway;
 import com.ecoembes.gateaway.PlantCommunicationException;
+
 
 @Service
 public class RecyclingPlantService {
 	
-	private static final Logger logger = LoggerFactory.getILogger(RecyclingPlantService.class); // IA
+	private static final Logger logger = LoggerFactory.getLogger(RecyclingPlantService.class); // IA
 	
 	private final RecyclingPlantRepository recyclingPlantRepository;
 	private final AssigmentRepository assigmentRepository;
@@ -65,7 +68,7 @@ public class RecyclingPlantService {
 	// Capacidad total de la planta menos lo ya asignado ESE día (consulta en BD)
 	@Transactional(readOnly = true)
 	public Optional<Integer> getAvailableCapacity(LocalDateTime date, RecyclingPlant plant) {
-		IRecyclingPlantGateway gateway=  RecyclingPlantGatewayFactory.createGateway(plant);
+		IRecyclingPlantGateaway gateway=  RecyclingPlantGateawayFactory.createGateway(plant);
 		return gateway.getAvailableCapacity(date.toLocalDate());
 	}
 
@@ -101,7 +104,7 @@ public class RecyclingPlantService {
 		LocalDateTime now = LocalDateTime.now();
 		
 		//Realizado con ayuda de IA
-		IRecyclingPlantGateway gateway = RecyclingPlantGatewayFactory.createGateway(plant);
+		IRecyclingPlantGateaway gateway = RecyclingPlantGateawayFactory.createGateway(plant);
 		int available = gateway.getAvailableCapacity(now.toLocalDate())
 				.orElseThrow(()-> new PlantCommunicationException(
 						"Could not get the capacity of plant "+ plantId));

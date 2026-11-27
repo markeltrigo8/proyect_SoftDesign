@@ -57,7 +57,6 @@ public class DataInitializer {
 
 			recyclingPlantService.addRecyclingPlant(plant1);
 			recyclingPlantService.addRecyclingPlant(plant2);
-			recyclingPlantService.addRecyclingPlant(plant3);
 
 			logger.info("Recycling plants saved!");
 
