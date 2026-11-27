@@ -14,7 +14,6 @@ public class RecyclingPlant {
 	private int id;
 
 	private String name;
-	private double capacity;
 
 	@OneToMany(mappedBy = "recyclingPlant")
 	private List<Assigment> assigments = new ArrayList<>();
@@ -23,44 +22,16 @@ public class RecyclingPlant {
 	protected RecyclingPlant() {
 	}
 
-	public RecyclingPlant(int id, String name, double capacity) {
+	public RecyclingPlant(int id, String name) {
 		this.id = id;
 		this.name = name;
-		this.capacity = capacity;
 	}
 
-	public int getId() {
-		return id;
-	}
+	public int getId() { return id; }
+	public void setId(int id) { this.id = id; }
+	public String getName() { return name; }
+	public void setName(String name) { this.name = name; }
 
-	public void setId(int id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public double getTotalCapacity() {
-		return capacity;
-	}
-
-	public void setCapacity(double capacity) {
-		this.capacity = capacity;
-	}
-
-	public void addAssigment(Assigment a) {
-		this.assigments.add(a);
-	}
-
-	public List<Assigment> getAssigments() {
-		return assigments;
-	}
-
-	// La capacidad asignada por día se calcula ahora con
-	// AssigmentRepository.sumContainersByPlantAndDay(...)
+	public void addAssigment(Assigment a) { this.assigments.add(a); }
+	public List<Assigment> getAssigments() { return assigments; }
 }

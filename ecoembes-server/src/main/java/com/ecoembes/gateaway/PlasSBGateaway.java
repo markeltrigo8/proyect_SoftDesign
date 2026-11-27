@@ -1,7 +1,6 @@
 package com.ecoembes.gateaway;
 
 import java.io.IOException;
-
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -16,8 +15,8 @@ import java.util.Properties;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import com.ecoembes.gateaway.PlantCommunicationException;
+
+import com.ecoembes.exception.PlantCommunicationException;
 
 import tools.jackson.databind.ObjectMapper; // Spring Boot 3: com.fasterxml.jackson.databind.ObjectMapper
 
@@ -83,6 +82,7 @@ public class PlasSBGateaway implements IRecyclingPlantGateaway {
 			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
 			if (response.statusCode() != 200) {
+				logger.warn("PlasSB returned HTTP {} when asking for the capacity", response.statusCode());
 				return Optional.empty();
 			}
 
@@ -100,6 +100,7 @@ public class PlasSBGateaway implements IRecyclingPlantGateaway {
 			Thread.currentThread().interrupt();
 			return Optional.empty();
 		} catch (Exception ex) {
+			logger.warn("Could not get the capacity from PlasSB: {}", ex.getMessage());
 			return Optional.empty();
 		}
 	}
@@ -121,24 +122,22 @@ public class PlasSBGateaway implements IRecyclingPlantGateaway {
 					.build();
 
 			HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-			
+
 			int status = response.statusCode();
-			
+
 			if (status == 200 || status == 201) {
 				return;
 			}
-			if(status == 409) {
+			if (status == 409) {
 				throw new IllegalStateException("The plant does not have enough capacity");
 			}
-			throw new PlantCommunicationException("PlasSB rejected the notification (HTTP "+ status+")");
-			
+			throw new PlantCommunicationException("PlasSB rejected the notification (HTTP " + status + ")");
 
 		} catch (InterruptedException ex) {
 			Thread.currentThread().interrupt();
-			throw new PlantCommunicationException("Interrupted while notifying PlasSB ",ex);
+			throw new PlantCommunicationException("Interrupted while notifying PlasSB", ex);
 		} catch (IOException ex) {
-			// El método es void: un fallo de red no debe romper la asignación ya registrada
-			throw new PlantCommunicationException("Could not notify PlasSB: {}", ex);
+			throw new PlantCommunicationException("Could not notify PlasSB: " + ex.getMessage(), ex);
 		}
 	}
 }

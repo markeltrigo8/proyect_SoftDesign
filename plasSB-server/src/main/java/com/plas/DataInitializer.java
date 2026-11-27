@@ -22,6 +22,7 @@ public class DataInitializer {
 
 	private static final Logger logger = LoggerFactory.getLogger(DataInitializer.class);
 
+	@SuppressWarnings("unused")
 	@Bean
 	CommandLineRunner initData(RecyclingPlantRepository plantRepository,
 			AssignmentRepository assignmentRepository,

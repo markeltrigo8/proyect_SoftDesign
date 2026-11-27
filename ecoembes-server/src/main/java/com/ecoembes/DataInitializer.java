@@ -26,6 +26,7 @@ public class DataInitializer {
 
 	private static final int USAGE_HISTORY_DAYS = 5;
 
+	@SuppressWarnings("unused")
 	@Bean
 	CommandLineRunner initData(AuthService authService,
 			DumpsterService dumpsterService,
@@ -51,8 +52,8 @@ public class DataInitializer {
 			logger.info("Employees saved!");
 
 			// ---------- Plantas de reciclaje ----------
-			RecyclingPlant plant1 = new RecyclingPlant(1, "PlasSb", 120.0);
-			RecyclingPlant plant2 = new RecyclingPlant(2, "ContSocket", 85.5);
+			RecyclingPlant plant1 = new RecyclingPlant(1, "PlasSb");
+			RecyclingPlant plant2 = new RecyclingPlant(2, "ContSocket");
 		
 
 			recyclingPlantService.addRecyclingPlant(plant1);

@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
 
+import com.ecoembes.exception.PlantCommunicationException;
+
 public class ContSocketGateaway implements IRecyclingPlantGateaway {
 
 	private final String host;

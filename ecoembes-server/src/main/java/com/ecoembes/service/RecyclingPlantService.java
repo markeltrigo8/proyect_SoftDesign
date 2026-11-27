@@ -23,9 +23,9 @@ import com.ecoembes.domain.Assigment;
 import com.ecoembes.domain.Dumpster;
 import com.ecoembes.domain.Employee;
 import com.ecoembes.domain.RecyclingPlant;
+import com.ecoembes.exception.PlantCommunicationException;
 import com.ecoembes.factory.RecyclingPlantGateawayFactory;
 import com.ecoembes.gateaway.IRecyclingPlantGateaway;
-import com.ecoembes.gateaway.PlantCommunicationException;
 
 
 @Service
@@ -99,6 +99,11 @@ public class RecyclingPlantService {
 		int totalCont = 0;
 		for (Dumpster d : dumpsters) {
 			totalCont += d.getNumContainers();
+		}
+
+		if (totalCont <= 0) {
+			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+					"The selected dumpsters have no containers to assign");
 		}
 
 		LocalDateTime now = LocalDateTime.now();
