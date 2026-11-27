@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.ecoembes.domain.RecyclingPlant;
+import com.ecoembes.gateaway.ContSocketGateaway;
 import com.ecoembes.gateaway.IRecyclingPlantGateaway;
 import com.ecoembes.gateaway.PlasSBGateaway;
 
@@ -38,9 +39,9 @@ public class RecyclingPlantGateawayFactory {
 			// Planta PlasSB: por API REST
 			return new PlasSBGateaway();
 
-		// case 2:
-		//     // Planta por sockets
-		//     return new TuGatewayDeSockets();
+		case 2:
+		    // Planta por sockets
+		    return new ContSocketGateaway();
 
 		default:
 			throw new IllegalStateException("No gateway configured for plant " + plant.getId());
