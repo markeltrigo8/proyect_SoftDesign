@@ -32,7 +32,7 @@ public class Assignment {
 	@ElementCollection
 	@CollectionTable(name = "assignment_dumpster", joinColumns = @JoinColumn(name = "assignment_id"))
 	@Column(name = "dumpster_id")
-	private List<String> dumpsterIds = new ArrayList<>();
+	private List<Integer> dumpsterIds = new ArrayList<>();
 
 	// Este lado guarda la clave foránea
 	@ManyToOne(optional = false)
@@ -43,7 +43,7 @@ public class Assignment {
 	protected Assignment() {
 	}
 
-	public Assignment(LocalDate date, int numDumpsters, int numContainers, List<String> dumpsterIds,
+	public Assignment(LocalDate date, int numDumpsters, int numContainers, List<Integer> dumpsterIds,
 			RecyclingPlant plant) {
 		this.date = date;
 		this.numDumpsters = numDumpsters;
@@ -80,11 +80,11 @@ public class Assignment {
 		this.numContainers = numContainers;
 	}
 
-	public List<String> getDumpsterIds() {
+	public List<Integer> getDumpsterIds() {
 		return dumpsterIds;
 	}
 
-	public void setDumpsterIds(List<String> dumpsterIds) {
+	public void setDumpsterIds(List<Integer> dumpsterIds) {
 		this.dumpsterIds = dumpsterIds;
 	}
 

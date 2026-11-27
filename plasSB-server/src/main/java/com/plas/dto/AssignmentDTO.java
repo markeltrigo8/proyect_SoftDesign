@@ -10,12 +10,12 @@ public class AssignmentDTO {
 	private LocalDate date;
 	private int numDumpsters;
 	private int numContainers;
-	private List<String> dumpsterIds;
+	private List<Integer> dumpsterIds;
 
 	public AssignmentDTO() {
 	}
 
-	public AssignmentDTO(Long id, LocalDate date, int numDumpsters, int numContainers, List<String> dumpsterIds) {
+	public AssignmentDTO(Long id, LocalDate date, int numDumpsters, int numContainers, List<Integer> dumpsterIds) {
 		this.id = id;
 		this.date = date;
 		this.numDumpsters = numDumpsters;
@@ -55,11 +55,11 @@ public class AssignmentDTO {
 		this.numContainers = numContainers;
 	}
 
-	public List<String> getDumpsterIds() {
+	public List<Integer> getDumpsterIds() {
 		return dumpsterIds;
 	}
 
-	public void setDumpsterIds(List<String> dumpsterIds) {
+	public void setDumpsterIds(List<Integer> dumpsterIds) {
 		this.dumpsterIds = dumpsterIds;
 	}
 }
